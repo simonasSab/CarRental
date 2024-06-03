@@ -14,9 +14,9 @@
         //    ConsoleKey.D2, ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6,
         //    ConsoleKey.D7, ConsoleKey.D8, ConsoleKey.D9 };
 
-        public RentConsoleUI(string connectionString)
+        public RentConsoleUI(IRentService rentService)
         {
-            RentService = new RentService(connectionString);
+            RentService = rentService;
         }
 
         public void MainMenu()

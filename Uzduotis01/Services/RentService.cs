@@ -14,9 +14,9 @@
     {
         private IDatabaseRepository DatabaseRepository { get; set; }
 
-        public RentService(string connectionString)
+        public RentService(IDatabaseRepository databaseRepository)
         {
-            DatabaseRepository = new DatabaseRepository(connectionString);
+            DatabaseRepository = databaseRepository;
         }
 
         public bool RegisterVehicle(ElectricVehicle electricVehicle)

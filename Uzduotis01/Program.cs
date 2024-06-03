@@ -11,7 +11,9 @@
     {
         public static void Main(string[] args)
         {
-            RentConsoleUI rentConsoleUI = new("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;");
+            DatabaseRepository databaseRepository = new("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;");
+            RentService rentService = new(databaseRepository);
+            RentConsoleUI rentConsoleUI = new(rentService);
 
             rentConsoleUI.MainMenu();
         }
