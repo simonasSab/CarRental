@@ -405,7 +405,12 @@
         // Rent ends on specific date (client returns car at any time before 23:59:59). 
         public bool RentIsPossible(Rent newRent)
         {
-            List<Rent> rents = new(DatabaseRepository.GetAllRents());
+            IEnumerable<Rent>? allRents = DatabaseRepository.GetAllRents();
+            if (allRents == null)
+                return true;
+
+            List<Rent> rents = new(allRents);
+
             if (rents.Count > 0)
             {
                 for (int i = 0; i < rents.Count; i++)

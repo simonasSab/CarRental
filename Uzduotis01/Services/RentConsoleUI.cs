@@ -171,11 +171,11 @@
                     RentService.RegisterRent(NewRent());
                     break;
                 case 50:case 98: // Edit vehicle
-                    int id = SelectVehicleID(out bool isElectric);
-                    if (isElectric)
-                        RentService.UpdateVehicle(NewRandomElectricVehicle());
+                    object? vehicle = UpdateVehicle(SelectVehicleID());
+                    if (vehicle == null)
+                        break;
                     else
-                        RentService.UpdateVehicle(NewRandomFossilFuelVehicle());
+                        RentService.UpdateVehicle(vehicle);
                     break;
                 case 51:case 99: // Delete vehicle
                     int id2 = SelectVehicleID();
@@ -320,10 +320,53 @@
             return client;
         }
 
-        public Rent NewRent()
+        public object? UpdateVehicle(int id)
+        {
+            if (!RentService.VehiclesIDExists(id, out bool isElectric))
+                return null;
+
+            Console.Clear();
+            Console.WriteLine("Please provide vehicle make: \n");
+            string make = SelectString();
+            if (make == "-1")
+                return null;
+
+            Console.Clear();
+            Console.WriteLine("Please provide vehicle model: \n");
+            string model = SelectString();
+            if (model == "-1")
+                return null;
+
+            Console.Clear();
+            Console.WriteLine("Please provide vehicle production year: \n");
+            int productionYear = SelectInteger(1900, 2025);
+            if (productionYear == -1)
+                return null;
+
+            if (isElectric)
+            {
+                Console.Clear();
+                Console.WriteLine("Please provide vehicle battery capacity: \n");
+                double batteryCapacity = SelectDouble(1, 3000);
+                return new ElectricVehicle(id, make, model, productionYear, batteryCapacity);
+            }
+            else
+            {
+                Console.Clear();
+                Console.WriteLine("Please provide vehicle fuel tank capacity: \n");
+                double fuelTankCapacity = SelectDouble(1, 3000);
+                return new FossilFuelVehicle(id, make, model, productionYear, fuelTankCapacity);
+            }
+        }
+
+        public Rent? NewRent()
         {
             int vehicleID = SelectVehicleID();
+            if (vehicleID == -1)
+                return null;
             int clientID = SelectClientID();
+            if (clientID == -1)
+                return null;
             DateTime dateFrom = SelectDate();
 
             Console.WriteLine("\nWould you like to set an end-date to the rent (yes/no)?\n");
@@ -339,6 +382,7 @@
             bool isInt;
             do
             {
+                Console.Clear();
                 Console.WriteLine("Enter vehicle ID number... (Cancel: -1)\n");
                 isInt = int.TryParse(Console.ReadLine(), out id);
                 if (id == -1)
@@ -360,6 +404,7 @@
             isElectric = false;
             do
             {
+                Console.Clear();
                 Console.WriteLine("Enter vehicle ID number... (Cancel: -1)\n");
                 isInt = int.TryParse(Console.ReadLine(), out id);
                 if (id == -1)
@@ -380,6 +425,7 @@
             bool isInt;
             do
             {
+                Console.Clear();
                 Console.WriteLine("Enter rent ID number... (Cancel: -1)\n");
                 isInt = int.TryParse(Console.ReadLine(), out id);
                 if (id == -1)
@@ -420,6 +466,7 @@
             bool isDateTime;
             do
             {
+                Console.Clear();
                 Console.WriteLine("Please provide a date: \n");
                 isDateTime = DateTime.TryParse(Console.ReadLine(), out date);
             }
@@ -428,6 +475,65 @@
             Console.WriteLine();
 
             return date;
+        }
+
+        public string SelectString()
+        {
+            string newString;
+            do
+            {
+                Console.WriteLine("(Cancel: -1)\n");
+                newString = Console.ReadLine();
+                if (newString == "-1")
+                {
+                    Console.WriteLine("\nCancelled\n");
+                    return newString;
+                }
+            }
+            while (newString == null || newString.Trim().Length < 1);
+
+            Console.WriteLine();
+            return newString;
+        }
+
+        public int SelectInteger(int minValueIncl, int maxValueExcl)
+        {
+            int integer;
+            bool isInt;
+            do
+            {
+                Console.WriteLine($"Enter a whole number >={minValueIncl} and <{maxValueExcl}... (Cancel: -1)\n");
+                isInt = int.TryParse(Console.ReadLine(), out integer);
+                if (integer == -1)
+                {
+                    Console.WriteLine("\nCancelled\n");
+                    return integer;
+                }
+            }
+            while (!isInt || integer < minValueIncl || integer >= maxValueExcl);
+
+            Console.WriteLine();
+            return integer;
+        }
+
+        public double SelectDouble(double minValueIncl, double maxValueExcl)
+        {
+            double doubleNumber;
+            bool isDouble;
+            do
+            {
+                Console.WriteLine($"Enter a fractional number between {minValueIncl} and {maxValueExcl}... (Cancel: -1)\n");
+                isDouble = double.TryParse(Console.ReadLine(), out doubleNumber);
+                if (doubleNumber == -1)
+                {
+                    Console.WriteLine("\nCancelled\n");
+                    return doubleNumber;
+                }
+            }
+            while (!isDouble || doubleNumber < minValueIncl || doubleNumber > maxValueExcl);
+
+            Console.WriteLine();
+            return doubleNumber;
         }
 
         public bool YesOrNo()

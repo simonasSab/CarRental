@@ -53,7 +53,7 @@
             else if (DateTo != null)
                 dateTo = ((DateTime)DateTo).ToString(("yyy-MM-dd"));
 
-            return $"ID:{ID:0000} Vehicle ID: {VehicleID}, Client ID: {ClientID}, Date From: {DateOnly.FromDateTime(DateFrom.Date)}, Date To: {dateTo}";
+            return $"ID {ID:000} Vehicle ID: {VehicleID}, Client ID: {ClientID}, Date From: {DateOnly.FromDateTime(DateFrom.Date)}, Date To: {dateTo}";
         }
 
         public int GetID()

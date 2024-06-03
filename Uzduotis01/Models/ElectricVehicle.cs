@@ -13,7 +13,12 @@
         {
             BatteryCapacity = batteryCapacity;
         }
-        // Without ID and VIN - for creating new entries in DB
+        // Without VIN - for editing in DB
+        public ElectricVehicle(int id, string make, string model, int productionYear, double batteryCapacity) : base(id, make, model, productionYear)
+        {
+            BatteryCapacity = batteryCapacity;
+        }
+        // Without ID and VIN - for editing or creating new entries in DB
         public ElectricVehicle(string make, string model, int productionYear, double batteryCapacity) : base(make, model, productionYear)
         {
             BatteryCapacity = batteryCapacity;
@@ -31,7 +36,7 @@
 
         public override string ToString()
         {
-            return $"ID{ID:000} {Make} {Model} {ProductionYear}, {VIN}, Battery Capacity: {BatteryCapacity:.0} kWh";
+            return $"ID {ID:000} {Make} {Model} {ProductionYear}, {VIN}, Battery Capacity: {BatteryCapacity:.0} kWh";
         }
     }
 }

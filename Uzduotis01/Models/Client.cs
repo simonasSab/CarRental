@@ -46,7 +46,7 @@
 
         public override string ToString()
         {
-            return $"ID {ID:0000} {FullName}, P/N {PersonalID}, Joined {RegistrationDateTime}";
+            return $"ID {ID:000} {FullName}, P/N {PersonalID}, Joined {RegistrationDateTime}";
         }
 
         public override bool Equals(object? obj)

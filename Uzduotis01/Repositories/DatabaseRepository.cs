@@ -257,8 +257,8 @@ namespace Uzduotis01
             {
                 using (IDbConnection db = new SqlConnection(_connectionString))
                 {
-                    const string sql = @"INSERT INTO Rent (VehicleID, ClientID) VALUES (@VehicleID, @ClientID);";
-                    if (db.Execute(sql, new { rent }) > 0)
+                    const string sql = @"INSERT INTO Rents (VehicleID, ClientID) VALUES (@VehicleID, @ClientID);";
+                    if (db.Execute(sql, new { VehicleID = rent.GetVehicleID(), ClientID = rent.GetClientID()}) > 0)
                         return true;
                 }
             }
@@ -266,8 +266,8 @@ namespace Uzduotis01
             {
                 using (IDbConnection db = new SqlConnection(_connectionString))
                 {
-                    const string sql = @"INSERT INTO Rent (VehicleID, ClientID, DateTo) VALUES (@VehicleID, @ClientID, @DateTo);";
-                    if (db.Execute(sql, new { rent }) > 0)
+                    const string sql = @"INSERT INTO Rents (VehicleID, ClientID, DateTo) VALUES (@VehicleID, @ClientID, @DateTo);";
+                    if (db.Execute(sql, new { VehicleID = rent.GetVehicleID(), ClientID = rent.GetClientID(), DateTo = rent.GetDateTo()}) > 0)
                         return true;
                 }
             }
@@ -277,12 +277,16 @@ namespace Uzduotis01
 
         public bool DeleteVehicle(int ID)
         {
-            foreach (Rent rent in GetAllRents())
+            IEnumerable<Rent>? rents = GetAllRents();
+            if (rents != null)
             {
-                if (rent.GetVehicleID() == ID)
+                foreach (Rent rent in rents)
                 {
-                    Console.WriteLine("The car is still being rented and cannot be deleted\n");
-                    return false;
+                    if (rent.GetVehicleID() == ID)
+                    {
+                        Console.WriteLine("The car is still being rented and cannot be deleted\n");
+                        return false;
+                    }
                 }
             }
 
@@ -353,17 +357,15 @@ namespace Uzduotis01
         public bool DeleteClient(int ID)
         {
             IEnumerable<Rent>? rents = GetAllRents();
-            if (rents == null)
+            if (rents != null)
             {
-                Console.WriteLine("There are no rents yet\n");
-                return false;
-            }
-            foreach (Rent rent in GetAllRents())
-            {
-                if (rent.GetClientID() == ID)
+                foreach (Rent rent in rents)
                 {
-                    Console.WriteLine("The client is still renting a car and cannot be deleted\n");
-                    return false;
+                    if (rent.GetClientID() == ID)
+                    {
+                        Console.WriteLine("The client is still renting a car and cannot be deleted\n");
+                        return false;
+                    }
                 }
             }
 
@@ -433,7 +435,7 @@ namespace Uzduotis01
                     }
 
                     const string sql3 = @"SELECT * FROM Vehicles v
-                        INNER JOIN ElectricVehicles e ON v.ID = e.ID; WHERE ID = @id;";
+                        INNER JOIN ElectricVehicles e ON v.ID = e.ID WHERE ID = @id;";
                     updatedVehicle = db2.QueryFirst<ElectricVehicle>(sql3, new { id });
                     return true;
                 }
@@ -475,7 +477,7 @@ namespace Uzduotis01
                     }
 
                     const string sql3 = @"SELECT * FROM Vehicles v" +
-                        "INNER JOIN ElectricVehicles e ON v.ID = e.ID; WHERE ID = @id;";
+                        "INNER JOIN ElectricVehicles e ON v.ID = e.ID WHERE ID = @id;";
                     updatedVehicle = db2.QueryFirst<ElectricVehicle>(sql3, new { id });
                     return true;
                 }

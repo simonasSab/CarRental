@@ -20,13 +20,21 @@
             ProductionYear = productionYear;
             VIN = vin;
         }
+        public Vehicle(int id, string make, string model, int productionYear)
+        {
+            ID = id;
+            Make = make;
+            Model = model;
+            ProductionYear = productionYear;
+            VIN = "temp";
+        }
         public Vehicle(int id)
         {
             ID = id;
             Make = "temp";
             Model = "temp";
             ProductionYear = 1337;
-            VIN = "temp1234567";
+            VIN = "temp";
         }
         public Vehicle(string make, string model, int productionYear)
         {
@@ -34,7 +42,7 @@
             Make = make;
             Model = model;
             ProductionYear = productionYear;
-            VIN = "0";
+            VIN = "temp";
         }
         public int GetID()
         {
