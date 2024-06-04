@@ -1,6 +1,6 @@
 ﻿namespace Uzduotis01
 {
-    internal enum Model
+    public enum Model
     {
         Accord,
         Aerostar,

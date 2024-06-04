@@ -1,6 +1,6 @@
 ﻿namespace Uzduotis01
 {
-    internal interface IRentService
+    public interface IRentService
     {
         bool RegisterVehicle(ElectricVehicle electricVehicle);
         bool RegisterVehicle(FossilFuelVehicle fossilFuelVehicle);
@@ -14,19 +14,20 @@
         int DisplayAllRents();
         int DisplayAllRents(int vehicleID);
 
-        Vehicle GetVehicle(int ID);
-        Client GetClient(int ID);
-        Rent GetRent(int ID);
+        Vehicle? GetVehicle(int ID);
+        Client? GetClient(int ID);
+        Rent? GetRent(int ID);
+        IEnumerable<Vehicle>? GetAllVehicles();
+        IEnumerable<ElectricVehicle>? GetAllElectricVehicles();
+        IEnumerable<FossilFuelVehicle>? GetAllFossilFuelVehicles();
 
         bool DeleteVehicle(int ID);
         bool DeleteClient(int ID);
         bool DeleteRent(int ID);
 
-        //bool UpdateElectricVehicle(ElectricVehicle electricVehicle);
-        //bool UpdateFossilFuelVehicle(FossilFuelVehicle fossilFuelVehicle);
-        bool UpdateVehicle(object vehicle);
-        bool UpdateClient(Client client);
-        bool UpdateRent(Rent rent);
+        bool UpdateVehicle(object? vehicle);
+        bool UpdateClient(Client? client);
+        bool UpdateRent(Rent? rent);
 
         bool VehiclesIDExists(int id);
         bool VehiclesIDExists(int id, out bool isElectric);

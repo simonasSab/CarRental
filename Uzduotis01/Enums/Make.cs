@@ -1,6 +1,6 @@
 ﻿namespace Uzduotis01
 {
-    internal enum Make
+    public enum Make
     {
         Acura,
         Audi,

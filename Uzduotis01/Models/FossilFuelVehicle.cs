@@ -1,9 +1,9 @@
 ﻿namespace Uzduotis01
 {
     // NaftosKuroAutomobilis: papildoma savybė BakoTalpa.
-    internal class FossilFuelVehicle : Vehicle
+    public class FossilFuelVehicle : Vehicle
     {
-        protected double TankCapacity { get; set; }
+        public double TankCapacity { get; set; }
 
         public FossilFuelVehicle()
         { 

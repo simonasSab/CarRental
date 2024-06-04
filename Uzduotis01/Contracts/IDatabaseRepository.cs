@@ -1,8 +1,7 @@
 ﻿namespace Uzduotis01
 {
-    internal interface IDatabaseRepository
+    public interface IDatabaseRepository
     {
-        //IEnumerable<Vehicle> GetAllVehicles();
         bool GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
         IEnumerable<Vehicle> GetAllVehicles(bool isElectric);
         IEnumerable<Client> GetAllClients();
@@ -22,8 +21,8 @@
         bool DeleteClient(int ID);
         bool DeleteRent(int ID);
 
-        bool UpdateVehicle(object vehicle, out object updatedVehicle);
-        bool UpdateClient(Client client, out Client updatedClient);
-        bool UpdateRent(Rent rent, out Rent updatedRent);
+        bool UpdateVehicle(object? vehicle, out object updatedVehicle);
+        bool UpdateClient(Client? client, out Client updatedClient);
+        bool UpdateRent(Rent? rent, out Rent updatedRent);
     }
 }

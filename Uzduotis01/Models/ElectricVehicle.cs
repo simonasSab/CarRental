@@ -1,9 +1,9 @@
 ﻿namespace Uzduotis01
 {
     // Elektromobilis: papildoma savybė BaterijosTalpa.
-    internal class ElectricVehicle : Vehicle
+    public class ElectricVehicle : Vehicle
     {
-        protected double BatteryCapacity { get; set; }
+        public double BatteryCapacity { get; set; }
 
         public ElectricVehicle()
         {

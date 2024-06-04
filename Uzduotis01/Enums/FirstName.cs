@@ -1,6 +1,6 @@
 ﻿namespace Uzduotis01
 {
-    internal enum FirstName
+    public enum FirstName
     {
         Aurelia,
         Felix,

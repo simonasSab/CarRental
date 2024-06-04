@@ -7,7 +7,7 @@
     // LABAI SVARBU
     // Laikini sąrašai, meniu ir kita, neturi būti Main dalyje - Main dalyje galimas tik servisų ir repositories inicializavimas!
 
-    internal class Program
+    public class Program
     {
         public static void Main(string[] args)
         {

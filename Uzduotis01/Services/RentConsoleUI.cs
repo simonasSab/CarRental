@@ -3,7 +3,7 @@
     // Programos valdymui su konsole turi būti sukurta klasė (kaip servisas) NuomaConsoleUI (RentConsoleUI),
     // kuriame turi būti meniu, visi pasirinkimai išbandyti visą programos funkcionalumą.
     // NuomaConsoleUI turi priimti kaip argumentą objektą pagal NuomaService interface.
-    internal class RentConsoleUI
+    public class RentConsoleUI
     {
         public static IRentService RentService { get; set; }
 
@@ -160,18 +160,20 @@
             }
             while (!validKeys.Contains(cki.Key));
 
-            Console.Clear();
             int selection = (int)cki.Key;
 
             switch (selection)
             {
                 case 48:case 96: // Go back
+                    Console.Clear();
                     break;
                 case 49:case 97: // Rent vehicle
                     RentService.RegisterRent(NewRent());
+                    Console.Clear();
                     break;
                 case 50:case 98: // Edit vehicle
                     object? vehicle = UpdateVehicle(SelectVehicleID());
+                    Console.Clear();
                     if (vehicle == null)
                         break;
                     else
@@ -179,6 +181,7 @@
                     break;
                 case 51:case 99: // Delete vehicle
                     int id2 = SelectVehicleID();
+                    Console.Clear();
                     if (id2 != -1)
                         RentService.DeleteVehicle(id2);
                     break;
@@ -208,20 +211,25 @@
             }
             while (!validKeys.Contains(cki.Key));
 
-            Console.Clear();
             int selection = (int)cki.Key;
 
             switch (selection)
             {
                 case 48:case 96:
+                    Console.Clear();
                     break;
                 case 49:case 97: // Edit client
-                    RentService.UpdateClient(NewRandomClient());
+                    int id = SelectClientID();
+                    Console.Clear();
+                    if (id != -1)
+                        RentService.UpdateClient(UpdateClient(id));
+                    Console.Clear();
                     break;
                 case 50:case 98: // Delete client
-                    int id = SelectClientID();
-                    if (id != -1)
-                        RentService.DeleteClient(id);
+                    int id2 = SelectClientID();
+                    Console.Clear();
+                    if (id2 != -1)
+                        RentService.DeleteClient(id2);
                     break;
                 default:
                     Console.WriteLine($"Unexpected error - program is quitting.");
@@ -249,20 +257,22 @@
             }
             while (!validKeys.Contains(cki.Key));
 
-            Console.Clear();
             int selection = (int)cki.Key;
 
             switch (selection)
             {
                 case 48:case 96:
+                    Console.Clear();
                     break;
                 case 49:case 97: // Edit rent
                     int id = SelectRentID();
+                    Console.Clear();
                     if (id != -1)
-                        RentService.UpdateRent(NewRent());
+                        RentService.UpdateRent(NewRent(id));
                     break;
                 case 50:case 98: // Delete rent
                     int id2 = SelectRentID();
+                    Console.Clear();
                     if (id2 != -1)
                         RentService.DeleteRent(id2);
                     break;
@@ -359,6 +369,26 @@
             }
         }
 
+        public Client? UpdateClient(int id)
+        {
+            if (!RentService.ClientsIDExists(id))
+                return null;
+
+            Console.Clear();
+            Console.WriteLine("Please provide full name: \n");
+            string fullName = SelectString();
+            if (fullName == "-1")
+                return null;
+
+            Console.Clear();
+            Console.WriteLine($"Enter an 11-digit personal ID number (Cancel: -1)\n");
+            long personalID = SelectPersonalID();
+            if (personalID == -1)
+                return null;
+
+            return new Client(id, fullName, personalID);
+        }
+
         public Rent? NewRent()
         {
             int vehicleID = SelectVehicleID();
@@ -376,14 +406,30 @@
                 return new(vehicleID, clientID, dateFrom);
         }
 
+        public Rent? NewRent(int id)
+        {
+            int vehicleID = SelectVehicleID();
+            if (vehicleID == -1)
+                return null;
+            int clientID = SelectClientID();
+            if (clientID == -1)
+                return null;
+            DateTime dateFrom = SelectDate();
+
+            Console.WriteLine("\nWould you like to set an end-date to the rent (yes/no)?\n");
+            if (YesOrNo())
+                return new(id, vehicleID, clientID, dateFrom, SelectDate());
+            else
+                return new(id, vehicleID, clientID, dateFrom);
+        }
+
         public int SelectVehicleID()
         {
             int id;
             bool isInt;
             do
             {
-                Console.Clear();
-                Console.WriteLine("Enter vehicle ID number... (Cancel: -1)\n");
+                Console.WriteLine("\nEnter vehicle ID number... (Cancel: -1)\n");
                 isInt = int.TryParse(Console.ReadLine(), out id);
                 if (id == -1)
                 {
@@ -404,8 +450,7 @@
             isElectric = false;
             do
             {
-                Console.Clear();
-                Console.WriteLine("Enter vehicle ID number... (Cancel: -1)\n");
+                Console.WriteLine("\nEnter vehicle ID number... (Cancel: -1)\n");
                 isInt = int.TryParse(Console.ReadLine(), out id);
                 if (id == -1)
                 {
@@ -425,8 +470,7 @@
             bool isInt;
             do
             {
-                Console.Clear();
-                Console.WriteLine("Enter rent ID number... (Cancel: -1)\n");
+                Console.WriteLine("\nEnter rent ID number... (Cancel: -1)\n");
                 isInt = int.TryParse(Console.ReadLine(), out id);
                 if (id == -1)
                 {
@@ -446,7 +490,7 @@
             bool isInt;
             do
             {
-                Console.WriteLine("Enter client ID number... (Cancel: -1)\n");
+                Console.WriteLine("\nEnter client ID number... (Cancel: -1)\n");
                 isInt = int.TryParse(Console.ReadLine(), out id);
                 if (id == -1)
                 {
@@ -466,8 +510,7 @@
             bool isDateTime;
             do
             {
-                Console.Clear();
-                Console.WriteLine("Please provide a date: \n");
+                Console.WriteLine("\nPlease provide a date: \n");
                 isDateTime = DateTime.TryParse(Console.ReadLine(), out date);
             }
             while (!isDateTime || date.Date < DateTime.Now.Date);
@@ -514,6 +557,28 @@
 
             Console.WriteLine();
             return integer;
+        }
+
+        public long SelectPersonalID()
+        {
+            long minValueIncl = 10000000000;
+            long maxValueExcl = 99999999999;
+            long number;
+            bool isLong;
+            do
+            {
+                Console.WriteLine("(Cancel: -1)\n");
+                isLong = long.TryParse(Console.ReadLine(), out number);
+                if (number == -1)
+                {
+                    Console.WriteLine("\nCancelled\n");
+                    return number;
+                }
+            }
+            while (!isLong || number < minValueIncl || number >= maxValueExcl);
+
+            Console.WriteLine();
+            return number;
         }
 
         public double SelectDouble(double minValueIncl, double maxValueExcl)

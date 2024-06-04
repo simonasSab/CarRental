@@ -1,13 +1,15 @@
-﻿namespace Uzduotis01
+﻿using Newtonsoft.Json;
+
+namespace Uzduotis01
 {
     // Sukurkite bazinę klasę Automobilis, kuri turės savybes: Id, Marke, Modelis, Metai, RegistracijosNumeris.
-    internal class Vehicle
+    public class Vehicle
     {
-        protected int ID { get; set; }
-        protected string Make { get; set; }
-        protected string Model { get; set; }
-        protected int ProductionYear { get; set; }
-        protected string VIN { get; set;  }
+        public int ID { get; set; }
+        public string Make { get; set; }
+        public string Model { get; set; }
+        public int ProductionYear { get; set; }
+        public string VIN { get; set;  }
 
         public Vehicle()
         {

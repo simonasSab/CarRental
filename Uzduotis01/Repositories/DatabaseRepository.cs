@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 namespace Uzduotis01
 {
     // Tai, ką laikėme DatabaseService, turi tapti DatabaseRepository ir turi būti laikoma aplanke Repositories.
-    internal class DatabaseRepository : IDatabaseRepository
+    public class DatabaseRepository : IDatabaseRepository
     {
         private readonly string _connectionString;
         public DatabaseRepository(string connectionString)
@@ -115,7 +115,7 @@ namespace Uzduotis01
                 const string sql = @"
                 SELECT * FROM Rents WHERE VehicleID = @vehicleID";
 
-                IEnumerable<Rent>? rents = db.Query<Rent>(sql);
+                IEnumerable<Rent>? rents = db.Query<Rent>(sql, new { vehicleID });
                 if (rents.Count() < 1)
                 {
                     return null;
@@ -136,7 +136,7 @@ namespace Uzduotis01
                 return vehicle;
             }
         }
-        public Client GetClient(int ID)
+        public Client? GetClient(int ID)
         {
             using (IDbConnection db1 = new SqlConnection(_connectionString))
             {
@@ -148,7 +148,7 @@ namespace Uzduotis01
                 return client;
             }
         }
-        public Rent GetRent(int ID)
+        public Rent? GetRent(int ID)
         {
             using (IDbConnection db1 = new SqlConnection(_connectionString))
             {
@@ -213,26 +213,6 @@ namespace Uzduotis01
             Console.WriteLine("Unexpected error: insertion not performed\n");
             return false;
         }
-        //public bool InsertElectricVehicle(ElectricVehicle vehicle)
-        //{
-        //    using (IDbConnection db = new SqlConnection(_connectionString))
-        //    {
-        //        const string sql = "INSERT INTO ElectricVehicles (BatteryCapacity) VALUES (@BatteryCapacity);";
-        //        if (db.Execute(sql, vehicle) > 0)
-        //            return true;
-        //    }
-        //    return false;
-        //}
-        //public bool InsertFossilFuelVehicle(FossilFuelVehicle vehicle)
-        //{
-        //    using (IDbConnection db = new SqlConnection(_connectionString))
-        //    {
-        //        const string sql = "INSERT INTO FossilFuelVehicles (TankCapacity) VALUES (@TankCapacity);";
-        //        if (db.Execute(sql, vehicle) > 0)
-        //            return true;
-        //    }
-        //    return false;
-        //}
         public bool InsertClient(Client client, out Client newClient)
         {
             newClient = client;
@@ -257,8 +237,8 @@ namespace Uzduotis01
             {
                 using (IDbConnection db = new SqlConnection(_connectionString))
                 {
-                    const string sql = @"INSERT INTO Rents (VehicleID, ClientID) VALUES (@VehicleID, @ClientID);";
-                    if (db.Execute(sql, new { VehicleID = rent.GetVehicleID(), ClientID = rent.GetClientID()}) > 0)
+                    const string sql = @"INSERT INTO Rents (VehicleID, ClientID, DateFrom) VALUES (@VehicleID, @ClientID, @DateFrom);";
+                    if (db.Execute(sql, new { VehicleID = rent.GetVehicleID(), ClientID = rent.GetClientID(), DateFrom = rent.GetDateFrom() }) > 0)
                         return true;
                 }
             }
@@ -266,8 +246,8 @@ namespace Uzduotis01
             {
                 using (IDbConnection db = new SqlConnection(_connectionString))
                 {
-                    const string sql = @"INSERT INTO Rents (VehicleID, ClientID, DateTo) VALUES (@VehicleID, @ClientID, @DateTo);";
-                    if (db.Execute(sql, new { VehicleID = rent.GetVehicleID(), ClientID = rent.GetClientID(), DateTo = rent.GetDateTo()}) > 0)
+                    const string sql = @"INSERT INTO Rents (VehicleID, ClientID, DateFrom, DateTo) VALUES (@VehicleID, @ClientID, @DateFrom, @DateTo);";
+                    if (db.Execute(sql, new { VehicleID = rent.GetVehicleID(), ClientID = rent.GetClientID(), DateFrom = rent.GetDateFrom(),DateTo = rent.GetDateTo()}) > 0)
                         return true;
                 }
             }
@@ -396,9 +376,11 @@ namespace Uzduotis01
             return false;
         }
 
-        public bool UpdateVehicle(object vehicle, out object updatedVehicle)
+        public bool UpdateVehicle(object? vehicle, out object updatedVehicle)
         {
             updatedVehicle = vehicle;
+            if (vehicle == null)
+                return false;
 
             if (vehicle is ElectricVehicle)
             {
@@ -485,19 +467,20 @@ namespace Uzduotis01
             Console.WriteLine("ERROR: Vehicle was neither Electric nor Fossil Fuel.\n");
             return false;
         }
-        public bool UpdateClient(Client client, out Client updatedClient)
+        public bool UpdateClient(Client? client, out Client updatedClient)
         {
             updatedClient = client;
+            if (client == null)
+                return false;
+
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
-                string fullName = client.GetFullName();
-                long personalID = client.GetPersonalID();
                 int id = client.GetID();
                 const string sql = @"
                 UPDATE Clients 
                 SET FullName = @FullName, PersonalID = @PersonalID
                 WHERE ID = @ID";
-                if (db.Execute(sql, new { fullName, personalID, id }) == 0)
+                if (db.Execute(sql, new { fullName = client.GetFullName(), personalID = client.GetPersonalID(), id }) == 0)
                 {
                     Console.WriteLine("ERROR: Client was not updated\n");
                     return false;
@@ -508,25 +491,29 @@ namespace Uzduotis01
                 return true;
             }
         }
-        public bool UpdateRent(Rent rent, out Rent updatedRent)
+        public bool UpdateRent(Rent? rent, out Rent updatedRent)
         {
-            DeleteOldRents();
             updatedRent = rent;
+            if (rent == null)
+                return false;
+
+            DeleteOldRents();
+
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
                 DateTime dateFrom = rent.GetDateFrom();
                 DateTime? dateTo = rent.GetDateTo();
+                int id = rent.GetID();
                 const string sql = @"
                 UPDATE Rents 
                 SET DateFrom = @dateFrom, DateTo = @dateTo
-                WHERE ID = @ID";
-                if (db.Execute(sql, new { dateFrom, dateTo }) == 0)
+                WHERE ID = @id";
+                if (db.Execute(sql, new { dateFrom, dateTo, id }) == 0)
                 {
                     Console.WriteLine("ERROR: Rent was not updated\n");
                     return false;
                 }
 
-                int id = rent.GetID();
                 const string sql3 = @"SELECT * FROM Rents WHERE ID = @id;";
                 updatedRent = db.QueryFirst<Rent>(sql3, new { id });
                 return true;

@@ -10,7 +10,7 @@
     //
     // (NuomaConsoleUI turi galimybę valdyti NuomaService) -> NuomaService turi turėti galimybę valdyti IDatabaseRepository.
     // Pats NuomaService turi priimti IDatabaseRepository, per kurį jis atlikinės visus veiksmus su duomenų baze.
-    internal class RentService : IRentService
+    public class RentService : IRentService
     {
         private IDatabaseRepository DatabaseRepository { get; set; }
 
@@ -52,7 +52,10 @@
             {
                 if (DatabaseRepository.InsertRent(rent))
                 {
-                    Console.WriteLine($"New rent agreement: {rent.ToString()}");
+                    if (rent.GetDateTo() == null)
+                        Console.WriteLine($"New rent agreement: Vehicle ID {rent.GetVehicleID()}, Client ID {rent.GetClientID()}, from {rent.GetDateFrom():d}");
+                    else
+                        Console.WriteLine($"New rent agreement: Vehicle ID {rent.VehicleID}, Client ID {rent.ClientID}, from {rent.GetDateFrom():d} to {rent.GetDateTo():d}");
                     return true;
                 }
                 return false;
@@ -94,25 +97,6 @@
             Console.WriteLine();
             return items;
         }
-        //public int DisplayAllVehicles()
-        //{
-        //    int count = 0;
-        //    IEnumerable<Vehicle>? vehicles = (IEnumerable<Vehicle>?)DatabaseRepository.GetAllVehicles();
-
-        //    if (vehicles == null)
-        //    {
-        //        Console.WriteLine("There are no vehicles in the database\n");
-        //        return 0;
-        //    }
-
-        //    foreach (Vehicle vehicle in vehicles)
-        //    {
-        //        Console.WriteLine(vehicle.ToString());
-        //        count++;
-        //    }
-        //    Console.WriteLine();
-        //    return count;
-        //}
         public int DisplayAllElectricVehicles()
         {
             int count = 0;
@@ -210,18 +194,85 @@
             return count;
         }
 
-        public Vehicle GetVehicle(int ID)
+        public Vehicle? GetVehicle(int ID)
         {
-            return DatabaseRepository.GetVehicle(ID);
+            if (VehiclesIDExists(ID))
+            {
+                return DatabaseRepository.GetVehicle(ID);
+            }
+            else
+            {
+                Console.WriteLine($"Vehicle not found with ID {ID:000}");
+                return null;
+            }
         }
-        public Client GetClient(int ID)
+        public Client? GetClient(int ID)
         {
-            return DatabaseRepository.GetClient(ID);
+            if (ClientsIDExists(ID))
+            {
+                return DatabaseRepository.GetClient(ID);
+            }
+            else
+            {
+                Console.WriteLine($"Client not found with ID {ID:000}");
+                return null;
+            }
         }
-        public Rent GetRent(int ID)
+        public Rent? GetRent(int ID)
         {
-            return DatabaseRepository.GetRent(ID);
+            if (RentsIDExists(ID))
+            {
+                return DatabaseRepository.GetRent(ID);
+            }
+            else
+            {
+                Console.WriteLine($"Rent not found with ID {ID:000}");
+                return null;
+            }
         }
+        public IEnumerable<Vehicle>? GetAllVehicles()
+        {
+            bool hasEntries = DatabaseRepository.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+
+            if (!hasEntries)
+            {
+                Console.WriteLine("There are no vehicles in the database\n");
+                return null;
+            }
+
+            if (fossilFuelVehicles.Count() > 0)
+            {
+                return fossilFuelVehicles;
+            }
+            if (electricVehicles.Count() > 0)
+            {
+                return electricVehicles;
+            }
+            return null;
+        }
+        public IEnumerable<ElectricVehicle>? GetAllElectricVehicles()
+        {
+            IEnumerable<ElectricVehicle> vehicles = (IEnumerable <ElectricVehicle>)DatabaseRepository.GetAllVehicles(true);
+
+            if (vehicles.Count() < 1)
+            {
+                Console.WriteLine("There are no electric vehicles in the database\n");
+                return null;
+            }
+            return vehicles;
+        }
+        public IEnumerable<FossilFuelVehicle>? GetAllFossilFuelVehicles()
+        {
+            IEnumerable<FossilFuelVehicle> vehicles = (IEnumerable<FossilFuelVehicle>)DatabaseRepository.GetAllVehicles(false);
+
+            if (vehicles.Count() < 1)
+            {
+                Console.WriteLine("There are no fossil fuel vehicles in the database\n");
+                return null;
+            }
+            return vehicles;
+        }
+
 
         public bool DeleteVehicle(int ID)
         {
@@ -251,27 +302,11 @@
             return false;
         }
 
-        //public bool UpdateElectricVehicle(ElectricVehicle electricVehicle)
-        //{
-        //    if (DatabaseRepository.UpdateVehicle(electricVehicle, true))
-        //    {
-        //        Console.WriteLine($"Updated vehicle: {electricVehicle.ToString()}");
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        //public bool UpdateFossilFuelVehicle(FossilFuelVehicle fossilFuelVehicle)
-        //{
-        //    if (DatabaseRepository.UpdateVehicle(fossilFuelVehicle, false))
-        //    {
-        //        Console.WriteLine($"Updated vehicle: {fossilFuelVehicle.ToString()}");
-        //        return true;
-        //    }
-        //    return false;
-        //}
-
-        public bool UpdateVehicle(object vehicle)
+        public bool UpdateVehicle(object? vehicle)
         {
+            if (vehicle == null)
+                return false;
+
             if (DatabaseRepository.UpdateVehicle(vehicle, out object updatedVehicle))
             {
                 if (vehicle is ElectricVehicle)
@@ -287,8 +322,11 @@
             }
             return false;
         }
-        public bool UpdateClient(Client client)
+        public bool UpdateClient(Client? client)
         {
+            if (client == null)
+                return false;
+
             if (DatabaseRepository.UpdateClient(client, out Client newCLient))
             {
                 Console.WriteLine($"Updated client: {newCLient.ToString()}");
@@ -296,8 +334,11 @@
             }
             return false;
         }
-        public bool UpdateRent(Rent rent)
+        public bool UpdateRent(Rent? rent)
         {
+            if (rent == null)
+                return false;
+
             DisplayAllRents(rent.GetVehicleID());
 
             if (RentUpdateIsPossible(rent))

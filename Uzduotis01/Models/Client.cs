@@ -1,11 +1,11 @@
 ﻿namespace Uzduotis01
 {
-    internal class Client
+    public class Client
     {
-        private int ID { get; set; }
-        private string FullName { get; set; }
-        private long PersonalID { get; set; }
-        private DateTime RegistrationDateTime { get; set;  }
+        public int ID { get; set; }
+        public string FullName { get; set; }
+        public long PersonalID { get; set; }
+        public DateTime RegistrationDateTime { get; set;  }
 
         public Client()
         {
@@ -14,6 +14,13 @@
         public Client(string fullName)
         {
             FullName = fullName;
+        }
+        public Client(int id, string fullName, long personalID)
+        {
+            ID = id;
+            FullName = fullName;
+            PersonalID = personalID;
+            RegistrationDateTime = DateTime.MinValue;
         }
         public Client(int id, string fullName, long personalID, DateTime registrationDateTime)
         {

@@ -1,6 +1,6 @@
 ﻿namespace Uzduotis01
 {
-    internal enum LastName
+    public enum LastName
     {
         Gibson,
         Ellis,
