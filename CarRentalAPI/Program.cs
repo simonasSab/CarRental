@@ -1,5 +1,3 @@
-using CarRentalAPI.Controllers;
-using Microsoft.Extensions.DependencyInjection;
 using Uzduotis01;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +24,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors("AllowSpecificOrigin");
 
 app.MapControllers();
 

@@ -98,5 +98,10 @@ namespace Uzduotis01
 
             return false;
         }
+
+        public override string ToString()
+        {
+            return $"ID {ID:000} {Make} {Model} {ProductionYear}, {VIN}";
+        }
     }
 }

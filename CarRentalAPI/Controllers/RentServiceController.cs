@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Uzduotis01;
 
-namespace CarRentalAPI.Controllers
+namespace CarRentalAPI
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -22,14 +22,24 @@ namespace CarRentalAPI.Controllers
             return _rentService.GetAllVehicles();
         }
         [HttpGet("GetAllElectricVehicles")]
-        public IEnumerable<Vehicle>? GetAllElectricVehicles()
+        public IEnumerable<ElectricVehicle>? GetAllElectricVehicles()
         {
             return _rentService.GetAllElectricVehicles();
         }
         [HttpGet("GetAllFossilFuelVehicles")]
-        public IEnumerable<Vehicle>? GetAllFossilFuelVehicles()
+        public IEnumerable<FossilFuelVehicle>? GetAllFossilFuelVehicles()
         {
             return _rentService.GetAllFossilFuelVehicles();
+        }
+        [HttpGet("GetAllClients")]
+        public IEnumerable<Client>? GetAllClients()
+        {
+            return _rentService.GetAllClients();
+        }
+        [HttpGet("GetAllRents")]
+        public IEnumerable<Rent>? GetAllRents()
+        {
+            return _rentService.GetAllRents();
         }
 
 
@@ -67,25 +77,41 @@ namespace CarRentalAPI.Controllers
         }
 
 
+        [HttpGet("VehiclesIDExists")]
+        public bool VehiclesIDExists(int id)
+        {
+            return _rentService.VehiclesIDExists(id);
+        }
+        [HttpGet("ClientsIDExists")]
+        public bool ClientsIDExists(int id)
+        {
+            return _rentService.ClientsIDExists(id);
+        }
+        [HttpGet("RentsIDExists")]
+        public bool RentsIDExists(int id)
+        {
+            return _rentService.RentsIDExists(id);
+        }
+
         // HttpPost methods
 
         [HttpPost("RegisterElectricVehicle")]
-        public bool RegisterVehicle(ElectricVehicle electricVehicle)
+        public bool RegisterVehicle([FromForm] ElectricVehicle electricVehicle)
         {
             return _rentService.RegisterVehicle(electricVehicle);
         }
         [HttpPost("RegisterFossilFUelVehicle")]
-        public bool RegisterVehicle(FossilFuelVehicle fossilFuelVehicle)
+        public bool RegisterVehicle([FromForm] FossilFuelVehicle fossilFuelVehicle)
         {
             return _rentService.RegisterVehicle(fossilFuelVehicle);
         }
         [HttpPost("RegisterClient")]
-        public bool RegisterClient(Client client)
+        public bool RegisterClient([FromForm] Client client)
         {
             return _rentService.RegisterClient(client);
         }
         [HttpPost("RegisterRent")]
-        public bool RegisterRent(Rent rent)
+        public bool RegisterRent([FromForm] Rent rent)
         {
             return _rentService.RegisterRent(rent);
         }
@@ -110,23 +136,6 @@ namespace CarRentalAPI.Controllers
         public bool UpdateRent(Rent? rent)
         {
             return _rentService.UpdateRent(rent);
-        }
-
-
-        [HttpGet("VehiclesIDExists")]
-        public bool VehiclesIDExists(int id)
-        {
-            return _rentService.VehiclesIDExists(id);
-        }
-        [HttpGet("ClientsIDExists")]
-        public bool ClientsIDExists(int id)
-        {
-            return _rentService.ClientsIDExists(id);
-        }
-        [HttpGet("RentsIDExists")]
-        public bool RentsIDExists(int id)
-        {
-            return _rentService.RentsIDExists(id);
         }
     }
 }

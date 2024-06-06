@@ -1,0 +1,44 @@
+﻿@page
+@using Uzduotis01;
+@model CarRental_FrontEnd.VehiclesModel
+@{
+}
+
+<div align="center">
+    <h2>All Vehicles</h2>
+
+    <button><a class="nav-link text-dark" asp-area="" asp-page="/ElectricVehicles">View and Add Electric Vehicles</a></button>
+    <button><a class="nav-link text-dark" asp-area="" asp-page="/FossilFuelVehicles">View and Add Fossil Fuel Vehicles</a></button>
+
+    @if (Model.Vehicles != null)
+    {
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>Production Year</th>
+                    <th>VIN</th>
+                </tr>
+            </thead>
+            @foreach (Vehicle vehicle in Model.Vehicles)
+            {
+                <tr>
+                    <td>@vehicle.GetID()</td>
+                    <td>@vehicle.GetMake()</td>
+                    <td>@vehicle.GetModel()</td>
+                    <td>@vehicle.GetProductionYear()</td>
+                    <td>@vehicle.GetVIN()</td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>Vehicle fleet is still empty :(</p>
+    }
+
+    <button><a class="nav-link text-dark" asp-area="" asp-page="/ElectricVehicles">View and Add Electric Vehicles</a></button>
+    <button><a class="nav-link text-dark" asp-area="" asp-page="/FossilFuelVehicles">View and Add Fossil Fuel Vehicles</a></button>
+</div>

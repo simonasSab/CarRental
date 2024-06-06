@@ -1,4 +1,6 @@
-﻿namespace Uzduotis01
+﻿using System.Linq;
+
+namespace Uzduotis01
 {
     // Turi būti sukurtas NuomaService (RentService), kuriame būtų įgyvendinamas programos funkcionalumas:
     // Automobilių registracija ir jų tipų priskyrimas.
@@ -240,15 +242,18 @@
                 return null;
             }
 
-            if (fossilFuelVehicles.Count() > 0)
-            {
-                return fossilFuelVehicles;
-            }
-            if (electricVehicles.Count() > 0)
+            if (fossilFuelVehicles.Count() < 1)
             {
                 return electricVehicles;
             }
-            return null;
+            else if (electricVehicles.Count() < 1)
+            {
+                return fossilFuelVehicles;
+            }
+            else
+            {
+                return (IEnumerable<Vehicle>?)electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
+            }
         }
         public IEnumerable<ElectricVehicle>? GetAllElectricVehicles()
         {
@@ -271,6 +276,28 @@
                 return null;
             }
             return vehicles;
+        }
+        public IEnumerable<Client>? GetAllClients()
+        {
+            IEnumerable<Client> clients = DatabaseRepository.GetAllClients();
+
+            if (clients.Count() < 1)
+            {
+                Console.WriteLine("There are no clients in the database\n");
+                return null;
+            }
+            return clients;
+        }
+        public IEnumerable<Rent>? GetAllRents()
+        {
+            IEnumerable<Rent> rents = DatabaseRepository.GetAllRents();
+
+            if (rents.Count() < 1)
+            {
+                Console.WriteLine("There are no rents in the database\n");
+                return null;
+            }
+            return rents;
         }
 
 

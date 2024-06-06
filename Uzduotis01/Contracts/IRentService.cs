@@ -20,6 +20,8 @@
         IEnumerable<Vehicle>? GetAllVehicles();
         IEnumerable<ElectricVehicle>? GetAllElectricVehicles();
         IEnumerable<FossilFuelVehicle>? GetAllFossilFuelVehicles();
+        IEnumerable<Client>? GetAllClients();
+        IEnumerable<Rent>? GetAllRents();
 
         bool DeleteVehicle(int ID);
         bool DeleteClient(int ID);

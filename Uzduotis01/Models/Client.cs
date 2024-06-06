@@ -13,7 +13,10 @@
 
         public Client(string fullName)
         {
+            ID = 0;
             FullName = fullName;
+            PersonalID = 0;
+            RegistrationDateTime = DateTime.MinValue;
         }
         public Client(int id, string fullName, long personalID)
         {

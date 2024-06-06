@@ -29,10 +29,12 @@ namespace Uzduotis01
             {
                 const string sql1 = @"
                     SELECT v.ID, v.Make, v.Model, v.ProductionYear, v.VIN, e.BatteryCapacity
-                    FROM Vehicles v INNER JOIN ElectricVehicles e ON v.ID = e.ID;";
+                    FROM Vehicles v INNER JOIN ElectricVehicles e ON v.ID = e.ID
+                    ORDER BY v.ID;";
                 const string sql2 = @"
                     SELECT v.ID, v.Make, v.Model, v.ProductionYear, v.VIN, f.TankCapacity
-                    FROM Vehicles v INNER JOIN FossilFuelVehicles f ON v.ID = f.ID;";
+                    FROM Vehicles v INNER JOIN FossilFuelVehicles f ON v.ID = f.ID
+                    ORDER BY v.ID;";
 
                 electricVehicles = db.Query<ElectricVehicle>(sql1);
                 fossilFuelVehicles = db.Query<FossilFuelVehicle>(sql2);
@@ -52,7 +54,8 @@ namespace Uzduotis01
                 {
                     const string sql = @"
                     SELECT v.ID, v.Make, v.Model, v.ProductionYear, v.VIN, e.BatteryCapacity
-                    FROM Vehicles v INNER JOIN ElectricVehicles e ON v.ID = e.ID;";
+                    FROM Vehicles v INNER JOIN ElectricVehicles e ON v.ID = e.ID
+                    ORDER BY v.ID;";
 
                     IEnumerable<ElectricVehicle>? vehicles = db.Query<ElectricVehicle>(sql);
                     if (vehicles.Count() < 1)
@@ -65,7 +68,8 @@ namespace Uzduotis01
                 {
                     const string sql = @"
                     SELECT v.ID, v.Make, v.Model, v.ProductionYear, v.VIN, f.TankCapacity
-                    FROM Vehicles v INNER JOIN FossilFuelVehicles f ON v.ID = f.ID;";
+                    FROM Vehicles v INNER JOIN FossilFuelVehicles f ON v.ID = f.ID
+                    ORDER BY v.ID;";
 
                     IEnumerable<FossilFuelVehicle>? vehicles = db.Query<FossilFuelVehicle>(sql);
                     if (vehicles.Count() < 1)
@@ -81,7 +85,7 @@ namespace Uzduotis01
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
                 const string sql = @"
-                SELECT * FROM Clients";
+                SELECT * FROM Clients ORDER BY ID";
 
                 IEnumerable<Client>? clients = db.Query<Client>(sql);
                 if (clients.Count() < 1)
@@ -97,7 +101,7 @@ namespace Uzduotis01
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
                 const string sql = @"
-                SELECT * FROM Rents";
+                SELECT * FROM Rents ORDER BY ID";
 
                 IEnumerable<Rent>? rents = db.Query<Rent>(sql);
                 if (rents.Count() < 1)
@@ -217,6 +221,24 @@ namespace Uzduotis01
         {
             newClient = client;
             string fullName = client.GetFullName();
+            long personalID = client.GetPersonalID();
+
+            if (personalID != 0)
+            {
+                using (IDbConnection db = new SqlConnection(_connectionString))
+                {
+                    const string sql = @"INSERT INTO Clients (FullName, PersonalID) VALUES (@fullName, @personalID);";
+                    if (db.Execute(sql, new { fullName, personalID }) > 0)
+                    {
+                        const string sql2 = @"SELECT TOP(1) * FROM Clients ORDER BY ID DESC;";
+                        newClient = db.QueryFirst<Client>(sql2);
+                        return true;
+                    }
+                }
+                Console.WriteLine("Unexpected error: insertion not performed\n");
+                return false;
+            }
+
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
                 const string sql = @"INSERT INTO Clients (FullName) VALUES (@fullName);";

@@ -1,0 +1,148 @@
+﻿@page
+@using Uzduotis01;
+@model CarRental_FrontEnd.FossilFuelVehiclesModel
+@{
+}
+
+<div align="center">
+    <h2>Fossil Fuel Vehicles</h2>
+
+    <h4><button onclick="toggleFormDisplay('form0')">Register new Fossil Fuel Vehicle</button></h4>
+
+    <div id="form0" style="display:none">
+        <form id="registerForm0">
+            <label for="Make">Make</label>
+            <input type="text" id="Make" name="Make" />
+            <br />
+            <label for="Model">Model</label>
+            <input type="text" id="Model" name="Model" />
+            <br />
+            <label for="ProductionYear">Production Year</label>
+            <input type="number" id="ProductionYear" name="ProductionYear" />
+            <br />
+            <label for="TankCapacity">Fuel Tank Capacity</label>
+            <input type="number" id="TankCapacity" name="TankCapacity" />
+            <br />
+            <br />
+            <button type="submit">Register</button>
+        </form>
+    </div>
+
+    @if (Model.Vehicles != null)
+    {
+        <table class="styled-table" margin-left: auto; margin-right: auto>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>Production Year</th>
+                    <th>Fuel Tank Capacity</th>
+                    <th>VIN</th>
+                </tr>
+            </thead>
+            @foreach (FossilFuelVehicle vehicle in Model.Vehicles)
+            {
+                <tr>
+                    <td>@vehicle.GetID()</td>
+                    <td>@vehicle.GetMake()</td>
+                    <td>@vehicle.GetModel()</td>
+                    <td>@vehicle.GetProductionYear()</td>
+                    <td>@vehicle.GetTankCapacity()</td>
+                    <td>@vehicle.GetVIN()</td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>Fossil fuel vehicle fleet is still empty :( </p>
+    }
+
+    <h4><button onclick="toggleFormDisplay('form1')">Register new Fossil Fuel Vehicle</button></h4>
+
+    <div id="form1" style="display:none">
+        <form id="registerForm1">
+            <label for="Make">Make</label>
+            <input type="text" id="Make" name="Make" />
+            <br />
+            <label for="Model">Model</label>
+            <input type="text" id="Model" name="Model" />
+            <br />
+            <label for="ProductionYear">Production Year</label>
+            <input type="number" id="ProductionYear" name="ProductionYear" />
+            <br />
+            <label for="TankCapacity">Fuel Tank Capacity</label>
+            <input type="number" id="TankCapacity" name="TankCapacity" />
+            <br />
+            <br />
+            <button type="submit">Register</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    validateForm('registerForm0');
+    validateForm('registerForm1');
+    function validateForm(id) {
+        document.getElementById(id).addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const make = document.getElementById('Make').value;
+            const model = document.getElementById('Model').value;
+            const productionYear = document.getElementById('ProductionYear').value;
+            const batteryCapacity = document.getElementById('BatteryCapacity').value;
+
+            // Make and Model form validation
+            if (make.trim() === '' || model.trim() === '') {
+                alert('Please enter Make and Model.');
+                return false;
+            }
+            // productionYear form validation
+            if (productionYear < 0 || productionYear > 2024) {
+                alert('Please enter valid year (0 to 2024).');
+                return false;
+            }
+            // batteryCapacity form validation
+            if (batteryCapacity < 1 || batteryCapacity > 9999) {
+                alert('Please enter valid battery capacity in kWh (1 to 9999).');
+                return false;
+            }
+
+            // Create the request payload
+            const formData = new FormData();
+            formData.append('Make', make);
+            formData.append('Model', model);
+            formData.append('ProductionYear', productionYear);
+            formData.append('TankCapacity', tankCapacity);
+            formData.append('VIN', '0');
+            formData.append('ID', 0);
+
+            try {
+                const response = await fetch('https://localhost:7243/api/RentService/RegisterFossilVehicle', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: formData
+                });
+
+                // Handle successful response
+                alert('Registration successful!');
+                window.location.reload('https://localhost:7196/FossilFuelVehicles');
+            }
+            catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    }
+
+    function toggleFormDisplay(id) {
+        var element = document.getElementById(id);
+        if (element.style.display === "none") {
+            element.style.display = "block";
+        } else {
+            element.style.display = "none";
+        }
+    }
+</script>

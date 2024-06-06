@@ -1,0 +1,107 @@
+﻿@page
+@using Uzduotis01;
+@model CarRental_FrontEnd.ClientsModel
+@{
+}
+
+<div align="center">
+    <h2>All Clients</h2>
+
+    <h4><button onclick="toggleFormDisplay('form0')">Register new Client</button></h4>
+
+    <div id="form0" style="display:none">
+        <form id="registerForm0">
+            <label for="FullName">Full Name</label>
+            <input type="text" id="FullName" name="FullName" />
+            <br />
+            <label for="PersonalID">Personal ID (11 digits)</label>
+            <input type="number" id="PersonalID" name="PersonalID" />
+            <br />
+            <br />
+            <button type="submit">Register</button>
+        </form>
+    </div>
+
+    @if (Model.Clients != null)
+    {
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Personal ID</th>
+                    <th>Registration Date&Time</th>
+                </tr>
+            </thead>
+            @foreach (Client client in Model.Clients)
+            {
+                <tr>
+                    <td>@client.GetID()</td>
+                    <td>@client.GetFullName()</td>
+                    <td>@client.GetPersonalID()</td>
+                    <td>@client.GetRegistrationDateTime()</td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>Client list is still empty :(</p>
+    }
+
+    <h4><button onclick="toggleFormDisplay('form1')">Register new Client</button></h4>
+
+    <div id="form1" style="display:none">
+        <form id="registerForm1">
+            <label for="FullName">Full Name</label>
+            <input type="text" id="FullName" name="FullName" />
+            <br />
+            <label for="PersonalID">Personal ID (11 digits)</label>
+            <input type="number" id="PersonalID" name="PersonalID" />
+            <br />
+            <br />
+            <button type="submit">Register</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    validateForm('registerForm0');
+    validateForm('registerForm1');
+
+    function validateForm(id) {
+        document.getElementById(id).addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const fullName = document.getElementById('FullName').value;
+            const personalID = document.getElementById('PersonalID').value;
+
+            // Basic form validation
+            if (fullName.trim() === '' || (personalID.trim() !== '0' && personalID.length !== 11)) {
+                alert('Please enter a valid full name and 11-digit Personal ID (You can enter "0" to generate a random ID).');
+                return false;
+            }
+
+            // Create the request payload
+            const formData = new FormData();
+            formData.append('FullName', fullName);
+            formData.append('PersonalID', personalID);
+
+            try {
+                const response = await fetch('https://localhost:7243/api/RentService/RegisterClient', {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: formData
+                });
+
+                // Handle successful response
+                alert('Registration successful!');
+                window.location.reload('https://localhost:7196/Clients');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    }
+</script>
