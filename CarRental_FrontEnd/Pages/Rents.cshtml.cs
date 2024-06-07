@@ -18,19 +18,19 @@ namespace CarRental_FrontEnd
         {
             Rents = _apiService.GetAllRents();
         }
-        public bool VehiclesIDExists(int id)
-        {
-            if (_apiService.VehiclesIDExists(id))
-                return true;
-            return false;
-        }
+        //public bool VehiclesIDExists(int id)
+        //{
+        //    if (_apiService.VehiclesIDExists(id))
+        //        return true;
+        //    return false;
+        //}
 
-        public bool ClientsIDExists(int id)
-        {
-            if (_apiService.ClientsIDExists(id))
-                return true;
-            return false;
-        }
+        //public bool ClientsIDExists(int id)
+        //{
+        //    if (_apiService.ClientsIDExists(id))
+        //        return true;
+        //    return false;
+        //}
 
     }
 }

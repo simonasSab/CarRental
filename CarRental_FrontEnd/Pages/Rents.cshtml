@@ -4,8 +4,9 @@
 @{
     DateTime? dateTo;
     DateTime dateToNotNull;
-    int vehicleIDcs;
-    int clientIDcs;
+    List<int> csVehicleIDs = new();
+    List<int> csClientIDs = new();
+    int temp = 0;
 }
 
 <div align="center">
@@ -22,10 +23,10 @@
             <input type="number" id="ClientID" name="ClientID" />
             <br />
             <label for="DateFrom">Date From</label>
-            <input type="date" id="DateFrom" name="DateFrom" />
+            <input type="date" id="DateFrom" name="DateFrom"/>
             <br />
             <label for="DateTo">Date To</label>
-            <input type="date" id="DateTo" name="DateTo" />
+            <input type="date" id="DateTo" name="DateTo"/>
             <br />
             <br />
             <button type="submit">Register</button>
@@ -48,8 +49,18 @@
             {
                 <tr>
                     <td>@rent.GetID()</td>
-                    <td>@rent.GetVehicleID()</td>
-                    <td>@rent.GetClientID()</td>
+                    <td>@{
+                            temp = rent.GetVehicleID();
+                            csVehicleIDs.Add(temp);
+                        }
+                        <p>@temp</p>
+                    </td>
+                    <td>@{
+                            temp = rent.GetClientID();
+                            csClientIDs.Add(temp);
+                        }
+                        <p>@temp</p>
+                    </td>
                     <td>@rent.GetDateFrom().ToString("yyyy-MM-dd")</td>
                     <td>
                         @{ dateTo = rent.GetDateTo(); }
@@ -74,9 +85,8 @@
     }
 </div>
 
-<script type="text/javascript">
+<script>
     validateForm('registerForm0');
-    validateForm('registerForm1');
 
     function validateForm(id) {
         document.getElementById(id).addEventListener('submit', async function (event) {
@@ -87,23 +97,33 @@
             const dateFrom = document.getElementById('DateFrom').value;
             const dateTo = document.getElementById('DateTo').value;
 
+            // Check if vehicle ID exists
+            if (!VehicleIDExistsJS(vehicleID)) { 
+                alert('Please enter an existing Vehicle ID.');
+                return false;
+            }
 
-            // TO DO
-            //
-            // if (Model.VehiclesIDExists(vehicleID))
-            // // Basic form validation
-            // if (fullName.trim() === '' || (personalID.trim() !== '0' && personalID.length !== 11)) {
-            //     alert('Please enter a valid full name and 11-digit Personal ID (You can enter "0" to generate a random ID).');
-            //     return false;
-            // }
+            // Check if client ID exists
+            if (!ClientIDExistsJS(clientID)) {
+                alert('Please enter an existing Client ID.');
+                return false;
+            }
+
+            // Basic form validation
+            if (dateFrom < Date.now || dateTo < dateFrom) {
+                alert('Please enter valid dates.');
+                return false;
+            }
 
             // Create the request payload
             const formData = new FormData();
-            formData.append('FullName', fullName);
-            formData.append('PersonalID', personalID);
+            formData.append('VehicleID', vehicleID);
+            formData.append('ClientID', clientID);
+            formData.append('PersonDateFromalID', dateFrom);
+            formData.append('DateTo', dateTo);
 
             try {
-                const response = await fetch('https://localhost:7243/api/RentService/RegisterClient', {
+                const response = await fetch('https://localhost:7243/api/RentService/RegisterRent', {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
@@ -118,5 +138,41 @@
                 alert('An error occurred. Please try again.');
             }
         });
+    }
+
+    // // Broken
+    // function VehicleIDExistsJS(id)
+    // {
+    //     const vehicleIDs = [];
+    //     vehicleIDs  = @csVehicleIDs;
+
+    //     for (let i = 0; i < vehicleIDs.length; i++) { 
+    //         if (id === vehicleIDs[i]) { 
+    //             return true;}
+    //     }
+    //     return false;
+    // }
+
+    // // Broken
+    // function ClientIDExistsJS(id) {
+    //     const clientIDs = [];
+    //     clientIDs = @csClientIDs;
+
+    //     for (let i = 0; i < clientIDs.length; i++) {
+    //         if (id === clientIDs[i]) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
+
+    function toggleFormDisplay(id) {
+        var element = document.getElementById(id);
+        if (element.style.display === "none") {
+            element.style.display = "block";
+        }
+        else {
+            element.style.display = "none";
+        }
     }
 </script>
