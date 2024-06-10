@@ -1,4 +1,7 @@
-﻿namespace Uzduotis01
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Uzduotis01
 {
     public class Rent
     {
@@ -7,6 +10,7 @@
         public int ClientID { get; set; }
         public DateTime DateFrom { get; set; }
         public DateTime? DateTo { get; set; }
+        [BsonId] ObjectId mongoID { get; set; }
 
         // Empty
         public Rent()

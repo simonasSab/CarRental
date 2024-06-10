@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using MongoDB;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using System.Net;
 
 namespace Uzduotis01
 {
@@ -14,50 +17,95 @@ namespace Uzduotis01
     // Pats NuomaService turi priimti IDatabaseRepository, per kurį jis atlikinės visus veiksmus su duomenų baze.
     public class RentService : IRentService
     {
-        private IDatabaseRepository DatabaseRepository { get; set; }
+        private IDatabaseRepository DatabaseRepo { get; set; }
+        private IMongoDBRepository MongoDBRepo { get; set; }
+        private bool CacheCleaningON { get; set; } = false;
 
-        public RentService(IDatabaseRepository databaseRepository)
+        public RentService(IDatabaseRepository databaseRepository, IMongoDBRepository mongoDBRepository)
         {
-            DatabaseRepository = databaseRepository;
+            DatabaseRepo = databaseRepository;
+            MongoDBRepo = mongoDBRepository;
         }
 
-        public bool RegisterVehicle(ElectricVehicle electricVehicle)
+        public bool GetCacheCleaningON()
         {
-            if (DatabaseRepository.InsertVehicle(electricVehicle, out ElectricVehicle newVehicle))
+            return CacheCleaningON;
+        }
+
+        public void ToggleCacheCleaning(int cachePeriod)
+        {
+            if (!CacheCleaningON)
+            {
+                Console.WriteLine($"Cache Cleaning: ON ({cachePeriod / 1000} s)\n");
+                CacheCleaningON = true;
+                MongoDBRepo.TruncateDatabaseStart(cachePeriod);
+            }
+            else
+            {
+                Console.WriteLine("Cache Cleaning: OFF\n");
+                MongoDBRepo.TruncateDatabaseStop();
+                CacheCleaningON = false;
+            }
+        }
+
+        public async Task<bool> RegisterVehicle(ElectricVehicle electricVehicle)
+        {
+            if (DatabaseRepo.InsertVehicle(electricVehicle, out ElectricVehicle newVehicle))
             {
                 Console.WriteLine($"New electric vehicle: {newVehicle.ToString()}");
+
+                if (await MongoDBRepo.InsertVehicleAsync(newVehicle))
+                    Console.WriteLine($"Inserted to MongoDB successfully.\n");
+                else
+                    Console.WriteLine($"Failed to insert to MongoDB.\n");
+
                 return true;
             }
             return false;
         }
-        public bool RegisterVehicle(FossilFuelVehicle fossilFuelVehicle)
+        public async Task<bool> RegisterVehicle(FossilFuelVehicle fossilFuelVehicle)
         {
-            if (DatabaseRepository.InsertVehicle(fossilFuelVehicle, out FossilFuelVehicle newVehicle))
+            if (DatabaseRepo.InsertVehicle(fossilFuelVehicle, out FossilFuelVehicle newVehicle))
             {
                 Console.WriteLine($"New fossil fuel vehicle: {newVehicle.ToString()}");
+
+                if (await MongoDBRepo.InsertVehicleAsync(newVehicle))
+                    Console.WriteLine($"Inserted to MongoDB successfully.\n");
+                else
+                    Console.WriteLine($"Failed to insert to MongoDB.\n");
+
                 return true;
             }
             return false;
         }
-        public bool RegisterClient(Client client)
+        public async Task<bool> RegisterClient(Client client)
         {
-            if (DatabaseRepository.InsertClient(client, out Client newClient))
+            if (DatabaseRepo.InsertClient(client, out Client newClient))
             {
                 Console.WriteLine($"New client: {newClient.ToString()}");
+
+                if (await MongoDBRepo.InsertClientAsync(newClient))
+                    Console.WriteLine($"Inserted to MongoDB successfully.\n");
+                else
+                    Console.WriteLine($"Failed to insert to MongoDB.\n");
+
                 return true;
             }
             return false;
         }
-        public bool RegisterRent(Rent rent)
+        public async Task<bool> RegisterRent(Rent rent)
         {
             if (RentIsPossible(rent))
             {
-                if (DatabaseRepository.InsertRent(rent))
+                if (DatabaseRepo.InsertRent(rent, out Rent newRent))
                 {
-                    if (rent.GetDateTo() == null)
-                        Console.WriteLine($"New rent agreement: Vehicle ID {rent.GetVehicleID()}, Client ID {rent.GetClientID()}, from {rent.GetDateFrom():d}");
+                    Console.WriteLine($"New rent agreement: {newRent.ToString()}\n");
+
+                    if (await MongoDBRepo.InsertRentAsync(newRent))
+                        Console.WriteLine($"Inserted to MongoDB successfully.\n");
                     else
-                        Console.WriteLine($"New rent agreement: Vehicle ID {rent.VehicleID}, Client ID {rent.ClientID}, from {rent.GetDateFrom():d} to {rent.GetDateTo():d}");
+                        Console.WriteLine($"Failed to insert to MongoDB.\n");
+
                     return true;
                 }
                 return false;
@@ -72,7 +120,7 @@ namespace Uzduotis01
         public int DisplayAllVehicles()
         {
             int items = 0;
-            bool notEmpty = DatabaseRepository.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+            bool notEmpty = DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
 
             if (!notEmpty)
             {
@@ -99,16 +147,13 @@ namespace Uzduotis01
             Console.WriteLine();
             return items;
         }
-        public int DisplayAllElectricVehicles()
+        public async Task<int> DisplayAllElectricVehiclesAsync()
         {
             int count = 0;
-            List<ElectricVehicle>? vehicles = (List<ElectricVehicle>?)DatabaseRepository.GetAllVehicles(true);
+            List<ElectricVehicle>? vehicles = (List<ElectricVehicle>?)(await GetAllElectricVehicles());
 
             if (vehicles == null)
-            {
-                Console.WriteLine("There are no electric vehicles in the database\n");
                 return 0;
-            }
 
             foreach (ElectricVehicle vehicle in vehicles)
             {
@@ -118,16 +163,13 @@ namespace Uzduotis01
             Console.WriteLine();
             return count;
         }
-        public int DisplayAllFossilFuelVehicles()
+        public async Task<int> DisplayAllFossilFuelVehiclesAsync()
         {
             int count = 0;
-            IEnumerable<FossilFuelVehicle>? vehicles = (IEnumerable<FossilFuelVehicle>?)DatabaseRepository.GetAllVehicles(false);
+            List<FossilFuelVehicle>? vehicles = (List<FossilFuelVehicle>?)(await GetAllFossilFuelVehicles());
 
             if (vehicles == null)
-            {
-                Console.WriteLine("There are no fossil fuel vehicles in the database\n");
                 return 0;
-            }
 
             foreach (FossilFuelVehicle vehicle in vehicles)
             {
@@ -137,16 +179,13 @@ namespace Uzduotis01
             Console.WriteLine();
             return count;
         }
-        public int DisplayAllClients()
+        public async Task<int> DisplayAllClientsAsync()
         {
             int count = 0;
-            IEnumerable<Client>? clients = DatabaseRepository.GetAllClients();
+            List<Client>? clients = (List<Client>?)(await GetAllClients());
 
             if (clients == null)
-            {
-                Console.WriteLine("There are no clients in the database\n");
                 return 0;
-            }
 
             foreach (Client client in clients)
             {
@@ -156,17 +195,13 @@ namespace Uzduotis01
             Console.WriteLine();
             return count;
         }
-        public int DisplayAllRents()
+        public async Task<int> DisplayAllRentsAsync()
         {
             int count = 0;
-
-            IEnumerable<Rent>? rents = DatabaseRepository.GetAllRents();
+            List<Rent>? rents = (List<Rent>?)(await GetAllRents());
 
             if (rents == null)
-            {
-                Console.WriteLine("There are no rents in the database\n");
                 return 0;
-            }
 
             foreach (Rent rent in rents)
             {
@@ -179,7 +214,7 @@ namespace Uzduotis01
         public int DisplayAllRents(int vehicleID)
         {
             int count = 0;
-            IEnumerable<Rent>? rents = DatabaseRepository.GetAllRents(vehicleID);
+            IEnumerable<Rent>? rents = DatabaseRepo.GetAllRents(vehicleID);
 
             if (rents == null)
             {
@@ -200,7 +235,7 @@ namespace Uzduotis01
         {
             if (VehiclesIDExists(ID))
             {
-                return DatabaseRepository.GetVehicle(ID);
+                return DatabaseRepo.GetVehicle(ID);
             }
             else
             {
@@ -212,7 +247,7 @@ namespace Uzduotis01
         {
             if (ClientsIDExists(ID))
             {
-                return DatabaseRepository.GetClient(ID);
+                return DatabaseRepo.GetClient(ID);
             }
             else
             {
@@ -224,7 +259,7 @@ namespace Uzduotis01
         {
             if (RentsIDExists(ID))
             {
-                return DatabaseRepository.GetRent(ID);
+                return DatabaseRepo.GetRent(ID);
             }
             else
             {
@@ -232,9 +267,46 @@ namespace Uzduotis01
                 return null;
             }
         }
-        public IEnumerable<Vehicle>? GetAllVehicles()
+        //public IEnumerable<Vehicle>? GetAllVehicles()
+        //{
+        //    bool hasEntries = DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+
+        //    if (!hasEntries)
+        //    {
+        //        Console.WriteLine("There are no vehicles in the database\n");
+        //        return null;
+        //    }
+
+        //    if (fossilFuelVehicles.Count() < 1)
+        //    {
+        //        return electricVehicles;
+        //    }
+        //    else if (electricVehicles.Count() < 1)
+        //    {
+        //        return fossilFuelVehicles;
+        //    }
+        //    else
+        //    {
+        //        return (IEnumerable<Vehicle>?)electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
+        //    }
+        //}
+
+        public async Task<IEnumerable<Vehicle>>? GetAllVehicles()
         {
-            bool hasEntries = DatabaseRepository.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+            IEnumerable<Vehicle> vehicles = await MongoDBRepo.GetAllVehiclesAsync();
+            int mongoCount = vehicles.Count();
+
+            if (mongoCount > 0)
+            {
+                Console.WriteLine($"Successfully retrieved {mongoCount} electric vehicles from MongoDB cache\n");
+                return vehicles;
+            }
+            else
+            {
+                Console.WriteLine($"MongoDB cache is empty, synchronizing...\n");
+            }
+
+            bool hasEntries = DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
 
             if (!hasEntries)
             {
@@ -242,68 +314,132 @@ namespace Uzduotis01
                 return null;
             }
 
-            if (fossilFuelVehicles.Count() < 1)
+            if (fossilFuelVehicles.Count() == 0)
             {
+                await MongoDBRepo.ImportVehiclesAsync(electricVehicles);
                 return electricVehicles;
             }
-            else if (electricVehicles.Count() < 1)
+            else if (electricVehicles.Count() == 0)
             {
+                await MongoDBRepo.ImportVehiclesAsync(fossilFuelVehicles);
                 return fossilFuelVehicles;
             }
             else
             {
-                return (IEnumerable<Vehicle>?)electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
+                vehicles = (IEnumerable<Vehicle>)electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
+                await MongoDBRepo.ImportVehiclesAsync(electricVehicles, fossilFuelVehicles);
+                return vehicles;
             }
         }
-        public IEnumerable<ElectricVehicle>? GetAllElectricVehicles()
+        public async Task<IEnumerable<ElectricVehicle>?> GetAllElectricVehicles()
         {
-            IEnumerable<ElectricVehicle> vehicles = (IEnumerable <ElectricVehicle>)DatabaseRepository.GetAllVehicles(true);
+            IEnumerable<ElectricVehicle> vehiclesMongoDB = await MongoDBRepo.GetAllElectricVehiclesAsync();
+            int mongoCount = vehiclesMongoDB.Count();
+
+            if (mongoCount > 0)
+            {
+                Console.WriteLine($"Successfully retrieved {mongoCount} electric vehicles from MongoDB cache\n");
+                return vehiclesMongoDB;
+            }
+            else
+            {
+                Console.WriteLine($"MongoDB cache is empty, synchronizing...\n");
+            }
+
+            IEnumerable<ElectricVehicle> vehicles = (IEnumerable<ElectricVehicle>)DatabaseRepo.GetAllVehicles(true);
 
             if (vehicles.Count() < 1)
             {
                 Console.WriteLine("There are no electric vehicles in the database\n");
                 return null;
             }
+
+            await MongoDBRepo.ImportVehiclesAsync(vehicles);
             return vehicles;
         }
-        public IEnumerable<FossilFuelVehicle>? GetAllFossilFuelVehicles()
+        public async Task<IEnumerable<FossilFuelVehicle>?> GetAllFossilFuelVehicles()
         {
-            IEnumerable<FossilFuelVehicle> vehicles = (IEnumerable<FossilFuelVehicle>)DatabaseRepository.GetAllVehicles(false);
+            IEnumerable<FossilFuelVehicle> vehiclesMongoDB = await MongoDBRepo.GetAllFossilFuelVehiclesAsync();
+            int mongoCount = vehiclesMongoDB.Count();
+
+            if (mongoCount > 0)
+            {
+                Console.WriteLine($"Successfully retrieved {mongoCount} electric vehicles from MongoDB cache\n");
+                return vehiclesMongoDB;
+            }
+            else
+            {
+                Console.WriteLine($"MongoDB cache is empty, synchronizing...\n");
+            }
+
+            IEnumerable<FossilFuelVehicle> vehicles = (IEnumerable<FossilFuelVehicle>)DatabaseRepo.GetAllVehicles(false);
 
             if (vehicles.Count() < 1)
             {
                 Console.WriteLine("There are no fossil fuel vehicles in the database\n");
                 return null;
             }
+
+            await MongoDBRepo.ImportVehiclesAsync(vehicles);
             return vehicles;
         }
-        public IEnumerable<Client>? GetAllClients()
+        public async Task<IEnumerable<Client>?> GetAllClients()
         {
-            IEnumerable<Client> clients = DatabaseRepository.GetAllClients();
+            List<Client>? clientsMongoDB = await MongoDBRepo.GetAllClientsAsync();
+            int mongoCount = clientsMongoDB.Count();
+
+            if (mongoCount > 0)
+            {
+                Console.WriteLine($"Successfully retrieved {mongoCount} clients from MongoDB cache\n");
+                return clientsMongoDB;
+            }
+            else
+            {
+                Console.WriteLine($"MongoDB cache is empty, synchronizing...\n");
+            }
+
+            IEnumerable<Client> clients = DatabaseRepo.GetAllClients();
 
             if (clients.Count() < 1)
             {
                 Console.WriteLine("There are no clients in the database\n");
                 return null;
             }
+
+            await MongoDBRepo.ImportClientsAsync(clients);
             return clients;
         }
-        public IEnumerable<Rent>? GetAllRents()
+        public async Task<IEnumerable<Rent>?> GetAllRents()
         {
-            IEnumerable<Rent> rents = DatabaseRepository.GetAllRents();
+            IEnumerable<Rent> rentsMongoDB = await MongoDBRepo.GetAllRentsAsync();
+            int mongoCount = rentsMongoDB.Count();
+
+            if (mongoCount > 0)
+            {
+                Console.WriteLine($"Successfully retrieved {mongoCount} rents from MongoDB cache\n");
+                return rentsMongoDB;
+            }
+            else
+            {
+                Console.WriteLine($"MongoDB cache is empty, synchronizing...\n");
+            }
+
+            IEnumerable<Rent> rents = DatabaseRepo.GetAllRents();
 
             if (rents.Count() < 1)
             {
                 Console.WriteLine("There are no rents in the database\n");
                 return null;
             }
+
+            await MongoDBRepo.ImportRentsAsync(rents);
             return rents;
         }
 
 
         public bool DeleteVehicle(int ID)
         {
-            if (DatabaseRepository.DeleteVehicle(ID))
+            if (DatabaseRepo.DeleteVehicle(ID))
             {
                 Console.WriteLine($"Deleted vehicle with ID:{ID}");
                 return true;
@@ -312,7 +448,7 @@ namespace Uzduotis01
         }
         public bool DeleteClient(int ID)
         {
-            if (DatabaseRepository.DeleteClient(ID))
+            if (DatabaseRepo.DeleteClient(ID))
             {
                 Console.WriteLine($"Deleted client with ID:{ID}");
                 return true;
@@ -321,7 +457,7 @@ namespace Uzduotis01
         }
         public bool DeleteRent(int ID)
         {
-            if (DatabaseRepository.DeleteRent(ID))
+            if (DatabaseRepo.DeleteRent(ID))
             {
                 Console.WriteLine($"Deleted rent with ID:{ID}");
                 return true;
@@ -334,7 +470,7 @@ namespace Uzduotis01
             if (vehicle == null)
                 return false;
 
-            if (DatabaseRepository.UpdateVehicle(vehicle, out object updatedVehicle))
+            if (DatabaseRepo.UpdateVehicle(vehicle, out object updatedVehicle))
             {
                 if (vehicle is ElectricVehicle)
                 {
@@ -354,7 +490,7 @@ namespace Uzduotis01
             if (client == null)
                 return false;
 
-            if (DatabaseRepository.UpdateClient(client, out Client newCLient))
+            if (DatabaseRepo.UpdateClient(client, out Client newCLient))
             {
                 Console.WriteLine($"Updated client: {newCLient.ToString()}");
                 return true;
@@ -370,7 +506,7 @@ namespace Uzduotis01
 
             if (RentUpdateIsPossible(rent))
             {
-                if (DatabaseRepository.UpdateRent(rent, out Rent newRent))
+                if (DatabaseRepo.UpdateRent(rent, out Rent newRent))
                 {
                     Console.WriteLine($"Updated client: {newRent.ToString()}");
                     return true;
@@ -382,7 +518,7 @@ namespace Uzduotis01
 
         public bool VehiclesIDExists(int id)
         {
-            DatabaseRepository.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+            DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
             List<Vehicle> vehicles = [.. fossilFuelVehicles, .. electricVehicles];
 
             if (vehicles.Count > 0)
@@ -402,7 +538,7 @@ namespace Uzduotis01
         }
         public bool VehiclesIDExists(int id, out bool isElectric)
         {
-            DatabaseRepository.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+            DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
             List<Vehicle> vehicles = [.. fossilFuelVehicles, .. electricVehicles];
 
             isElectric = false;
@@ -431,7 +567,7 @@ namespace Uzduotis01
         }
         public bool ClientsIDExists(int id)
         {
-            List<Client> client = new(DatabaseRepository.GetAllClients());
+            List<Client> client = new(DatabaseRepo.GetAllClients());
 
             if (client.Count > 0)
             {
@@ -451,7 +587,7 @@ namespace Uzduotis01
 
         public bool RentsIDExists(int id)
         {
-            List<Rent> rents = new(DatabaseRepository.GetAllRents());
+            List<Rent> rents = new(DatabaseRepo.GetAllRents());
 
             if (rents.Count > 0)
             {
@@ -473,7 +609,7 @@ namespace Uzduotis01
         // Rent ends on specific date (client returns car at any time before 23:59:59). 
         public bool RentIsPossible(Rent newRent)
         {
-            IEnumerable<Rent>? allRents = DatabaseRepository.GetAllRents();
+            IEnumerable<Rent>? allRents = DatabaseRepo.GetAllRents();
             if (allRents == null)
                 return true;
 
@@ -524,7 +660,7 @@ namespace Uzduotis01
         // Rent update is possible for from- and to-dates
         public bool RentUpdateIsPossible(Rent rentUpdate)
         {
-            List<Rent> rents = new(DatabaseRepository.GetAllRents());
+            List<Rent> rents = new(DatabaseRepo.GetAllRents());
             if (rents.Count > 0)
             {
                 for (int i = 0; i < rents.Count; i++)

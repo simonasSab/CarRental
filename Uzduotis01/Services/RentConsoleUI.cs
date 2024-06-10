@@ -19,13 +19,13 @@
             RentService = rentService;
         }
 
-        public void MainMenu()
+        public async Task MainMenu()
         {
             ConsoleKeyInfo cki = new();
             ConsoleKey[] validKeys =
-                { ConsoleKey.NumPad0, ConsoleKey.NumPad1, ConsoleKey.NumPad2, ConsoleKey.NumPad3,
-                  ConsoleKey.NumPad4, ConsoleKey.NumPad5, ConsoleKey.NumPad6, ConsoleKey.D0, ConsoleKey.D1,
-                  ConsoleKey.D2, ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6 };
+                { ConsoleKey.NumPad0, ConsoleKey.NumPad1, ConsoleKey.NumPad2, ConsoleKey.NumPad3, ConsoleKey.NumPad4,
+                ConsoleKey.NumPad5, ConsoleKey.NumPad6, ConsoleKey.NumPad7, ConsoleKey.D0, ConsoleKey.D1, ConsoleKey.D2,
+                ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6, ConsoleKey.D7 };
 
             Console.WriteLine("~~~ CAR RENTAL \"NEW RANDOM\" ~~~" +
                   "\n\n1. Register a random electric vehicle" +
@@ -34,6 +34,7 @@
                     "\n4. Display vehicles..." +
                     "\n5. Display clients..." +
                     "\n6. Display rents..." +
+                    "\n7. Toggle Cache Cleaning on/off" +
                     "\n\n0. Quit.\n");
 
             do
@@ -53,37 +54,43 @@
                     Console.WriteLine($"\nGoodbye!");
                     return;
                 case 49:case 97: // Create and register random electric vehicle
-                    RentService.RegisterVehicle(NewRandomElectricVehicle());
+                    await RentService.RegisterVehicle(NewRandomElectricVehicle());
                     break;
                 case 50:case 98: // Create and register random fossil fuel vehicle
-                    RentService.RegisterVehicle(NewRandomFossilFuelVehicle());
+                    await RentService.RegisterVehicle(NewRandomFossilFuelVehicle());
                     break;
                 case 51:case 99: // Create and register random client
-                    RentService.RegisterClient(NewRandomClient());
+                    await RentService.RegisterClient(NewRandomClient());
                     break;
                 case 52:case 100: // Display Vehicles menu
-                    VehiclesMenu();
+                    await VehiclesMenu();
                     break;
                 case 53:case 101: // Display all clients (Clients menu)
-                    if (RentService.DisplayAllClients() == 0)
+                    if ((await RentService.DisplayAllClientsAsync()) == 0)
                         break;
                     else
                         ClientsOptionsMenu();
                     break;
                 case 54:case 102: // Display all rents (Rents menu)
-                    if (RentService.DisplayAllRents() == 0)
+                    if ((await RentService.DisplayAllRentsAsync()) == 0)
                         break;
                     else
-                        RentsOptionsMenu();
+                        await RentsOptionsMenu();
+                    break;
+                case 55:case 103: // Toggle Cache Cleaning on (with specific time period in ms) / off
+                    if (RentService.GetCacheCleaningON())
+                        RentService.ToggleCacheCleaning(0);
+                    else
+                        RentService.ToggleCacheCleaning(SelectInteger(1000, 3600001));
                     break;
                 default:
                     Console.WriteLine($"Unexpected error - program is quitting.");
                     return;
             }
-            MainMenu();
+            await MainMenu();
         }
 
-        public void VehiclesMenu()
+        public async Task VehiclesMenu()
         {
             ConsoleKeyInfo cki = new();
             ConsoleKey[] validKeys =
@@ -117,21 +124,21 @@
                     if (RentService.DisplayAllVehicles() == 0)
                         break;
                     else
-                        VehiclesOptionsMenu();
+                        await VehiclesOptionsMenu();
                     break;
                 case 50:
                 case 98: // Display electric vehicles and open Electric Vehicles Options Menu
-                    if (RentService.DisplayAllElectricVehicles() == 0)
+                    if ((await RentService.DisplayAllElectricVehiclesAsync()) == 0)
                         break;
                     else
-                        VehiclesOptionsMenu();
+                        await VehiclesOptionsMenu();
                     break;
                 case 51:
                 case 99: // Display fossil fuel vehicles and open Fossil FUel Vehicles Options Menu
-                    if (RentService.DisplayAllFossilFuelVehicles() == 0)
+                    if ((await RentService.DisplayAllFossilFuelVehiclesAsync()) == 0)
                         break;
                     else
-                        VehiclesOptionsMenu();
+                        await VehiclesOptionsMenu();
                     break;
                 default:
                     Console.WriteLine($"Unexpected error - program is quitting.");
@@ -139,7 +146,7 @@
             }
         }
 
-        public void VehiclesOptionsMenu()
+        public async Task VehiclesOptionsMenu()
         {
             ConsoleKeyInfo cki = new();
             ConsoleKey[] validKeys =
@@ -168,7 +175,7 @@
                     Console.Clear();
                     break;
                 case 49:case 97: // Rent vehicle
-                    RentService.RegisterRent(NewRent());
+                    await RentService.RegisterRent(NewRent());
                     Console.Clear();
                     break;
                 case 50:case 98: // Edit vehicle
@@ -237,7 +244,7 @@
             }
         }
 
-        public void RentsOptionsMenu()
+        public async Task RentsOptionsMenu()
         {
             ConsoleKeyInfo cki = new();
             ConsoleKey[] validKeys =

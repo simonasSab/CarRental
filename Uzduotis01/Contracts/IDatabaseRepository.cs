@@ -15,7 +15,7 @@
         bool InsertVehicle(ElectricVehicle vehicle, out ElectricVehicle newVehicle);
         bool InsertVehicle(FossilFuelVehicle vehicle, out FossilFuelVehicle newVehicle);
         bool InsertClient(Client client, out Client newClient);
-        bool InsertRent(Rent rent);
+        bool InsertRent(Rent rent, out Rent newRent);
 
         bool DeleteVehicle(int ID);
         bool DeleteClient(int ID);

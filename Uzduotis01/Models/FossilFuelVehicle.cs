@@ -1,4 +1,6 @@
-﻿namespace Uzduotis01
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace Uzduotis01
 {
     // NaftosKuroAutomobilis: papildoma savybė BakoTalpa.
     public class FossilFuelVehicle : Vehicle

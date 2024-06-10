@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject1", "TestProject
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarRentalAPI", "CarRentalAPI\CarRentalAPI.csproj", "{5E587B86-CABD-4718-87C8-BDA3F8B265C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarRental_FrontEnd", "CarRental_FrontEnd\CarRental_FrontEnd.csproj", "{7C3DA9B5-BA51-4877-8109-334F3E53328C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarRental_FrontEnd", "CarRental_FrontEnd\CarRental_FrontEnd.csproj", "{7C3DA9B5-BA51-4877-8109-334F3E53328C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

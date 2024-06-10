@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using System.Data;
 using System.Data.SqlClient;
+using System.Net;
 
 namespace Uzduotis01
 {
@@ -252,8 +253,10 @@ namespace Uzduotis01
             Console.WriteLine("Unexpected error: insertion not performed\n");
             return false;
         }
-        public bool InsertRent(Rent rent)
+        public bool InsertRent(Rent rent, out Rent newRent)
         {
+            newRent = rent;
+
             DeleteOldRents();
             if (rent.GetDateTo() == null)
             {
@@ -261,7 +264,11 @@ namespace Uzduotis01
                 {
                     const string sql = @"INSERT INTO Rents (VehicleID, ClientID, DateFrom) VALUES (@VehicleID, @ClientID, @DateFrom);";
                     if (db.Execute(sql, new { VehicleID = rent.GetVehicleID(), ClientID = rent.GetClientID(), DateFrom = rent.GetDateFrom() }) > 0)
+                    {
+                        const string sql2 = @"SELECT TOP(1) * FROM Rents ORDER BY ID DESC;";
+                        newRent = db.QueryFirst<Rent>(sql2);
                         return true;
+                    }
                 }
             }
             else
@@ -270,7 +277,11 @@ namespace Uzduotis01
                 {
                     const string sql = @"INSERT INTO Rents (VehicleID, ClientID, DateFrom, DateTo) VALUES (@VehicleID, @ClientID, @DateFrom, @DateTo);";
                     if (db.Execute(sql, new { VehicleID = rent.GetVehicleID(), ClientID = rent.GetClientID(), DateFrom = rent.GetDateFrom(),DateTo = rent.GetDateTo()}) > 0)
+                    {
+                        const string sql2 = @"SELECT TOP(1) * FROM Rents ORDER BY ID DESC;";
+                        newRent = db.QueryFirst<Rent>(sql2);
                         return true;
+                    }
                 }
             }
             Console.WriteLine("Unexpected error: insertion not performed\n");

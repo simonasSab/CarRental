@@ -1,15 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Uzduotis01
 {
     // Sukurkite bazinę klasę Automobilis, kuri turės savybes: Id, Marke, Modelis, Metai, RegistracijosNumeris.
+    [BsonDiscriminator(RootClass = true)]
+    [BsonKnownTypes(typeof(FossilFuelVehicle), typeof(ElectricVehicle))]
     public class Vehicle
     {
         public int ID { get; set; }
         public string Make { get; set; }
         public string Model { get; set; }
         public int ProductionYear { get; set; }
-        public string VIN { get; set;  }
+        public string VIN { get; set; }
+        [BsonId] ObjectId mongoID { get; set; }
 
         public Vehicle()
         {

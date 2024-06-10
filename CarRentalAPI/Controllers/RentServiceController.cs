@@ -1,5 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Uzduotis01;
+using MongoDB.Bson;
+using MongoDB.Driver.Core.Configuration;
+using System.Data.SqlClient;
+using System.Data;
+using MongoDB.Driver;
+using System.Threading;
 
 namespace CarRentalAPI
 {
@@ -22,24 +28,24 @@ namespace CarRentalAPI
             return _rentService.GetAllVehicles();
         }
         [HttpGet("GetAllElectricVehicles")]
-        public IEnumerable<ElectricVehicle>? GetAllElectricVehicles()
+        public async Task<IEnumerable<ElectricVehicle>?> GetAllElectricVehicles()
         {
-            return _rentService.GetAllElectricVehicles();
+            return await _rentService.GetAllElectricVehicles();
         }
         [HttpGet("GetAllFossilFuelVehicles")]
-        public IEnumerable<FossilFuelVehicle>? GetAllFossilFuelVehicles()
+        public async Task<IEnumerable<FossilFuelVehicle>?> GetAllFossilFuelVehicles()
         {
-            return _rentService.GetAllFossilFuelVehicles();
+            return await _rentService.GetAllFossilFuelVehicles();
         }
         [HttpGet("GetAllClients")]
-        public IEnumerable<Client>? GetAllClients()
+        public async Task<IEnumerable<Client>?> GetAllClients()
         {
-            return _rentService.GetAllClients();
+            return await _rentService.GetAllClients();
         }
         [HttpGet("GetAllRents")]
-        public IEnumerable<Rent>? GetAllRents()
+        public async Task<IEnumerable<Rent>?> GetAllRents()
         {
-            return _rentService.GetAllRents();
+            return await _rentService.GetAllRents();
         }
 
 
@@ -96,24 +102,24 @@ namespace CarRentalAPI
         // HttpPost methods
 
         [HttpPost("RegisterElectricVehicle")]
-        public bool RegisterVehicle([FromForm] ElectricVehicle electricVehicle)
+        public async Task<bool> RegisterVehicle([FromForm] ElectricVehicle electricVehicle)
         {
-            return _rentService.RegisterVehicle(electricVehicle);
+            return await _rentService.RegisterVehicle(electricVehicle);
         }
         [HttpPost("RegisterFossilFUelVehicle")]
-        public bool RegisterVehicle([FromForm] FossilFuelVehicle fossilFuelVehicle)
+        public async Task<bool> RegisterVehicle([FromForm] FossilFuelVehicle fossilFuelVehicle)
         {
-            return _rentService.RegisterVehicle(fossilFuelVehicle);
+            return await _rentService.RegisterVehicle(fossilFuelVehicle);
         }
         [HttpPost("RegisterClient")]
-        public bool RegisterClient([FromForm] Client client)
+        public async Task<bool> RegisterClient([FromForm] Client client)
         {
-            return _rentService.RegisterClient(client);
+            return await _rentService.RegisterClient(client);
         }
         [HttpPost("RegisterRent")]
-        public bool RegisterRent([FromForm] Rent rent)
+        public async Task<bool> RegisterRent([FromForm] Rent rent)
         {
-            return _rentService.RegisterRent(rent);
+            return await _rentService.RegisterRent(rent);
         }
 
 

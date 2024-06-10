@@ -1,11 +1,15 @@
-﻿namespace Uzduotis01
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Uzduotis01
 {
     public class Client
     {
         public int ID { get; set; }
         public string FullName { get; set; }
         public long PersonalID { get; set; }
-        public DateTime RegistrationDateTime { get; set;  }
+        public DateTime RegistrationDateTime { get; set; }
+        [BsonId] ObjectId mongoID { get; set; }
 
         public Client()
         {

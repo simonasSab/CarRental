@@ -2,26 +2,29 @@
 {
     public interface IRentService
     {
-        bool RegisterVehicle(ElectricVehicle electricVehicle);
-        bool RegisterVehicle(FossilFuelVehicle fossilFuelVehicle);
-        bool RegisterClient(Client client);
-        bool RegisterRent(Rent rent);
+        void ToggleCacheCleaning(int cachePeriod);
+        bool GetCacheCleaningON();
+
+        Task<bool> RegisterVehicle(ElectricVehicle electricVehicle);
+        Task<bool> RegisterVehicle(FossilFuelVehicle fossilFuelVehicle);
+        Task<bool> RegisterClient(Client client);
+        Task<bool> RegisterRent(Rent rent);
 
         int DisplayAllVehicles();
-        int DisplayAllElectricVehicles();
-        int DisplayAllFossilFuelVehicles();
-        int DisplayAllClients();
-        int DisplayAllRents();
+        Task<int> DisplayAllElectricVehiclesAsync();
+        Task<int> DisplayAllFossilFuelVehiclesAsync();
+        Task<int> DisplayAllClientsAsync();
+        Task<int> DisplayAllRentsAsync();
         int DisplayAllRents(int vehicleID);
 
         Vehicle? GetVehicle(int ID);
         Client? GetClient(int ID);
         Rent? GetRent(int ID);
-        IEnumerable<Vehicle>? GetAllVehicles();
-        IEnumerable<ElectricVehicle>? GetAllElectricVehicles();
-        IEnumerable<FossilFuelVehicle>? GetAllFossilFuelVehicles();
-        IEnumerable<Client>? GetAllClients();
-        IEnumerable<Rent>? GetAllRents();
+        Task<IEnumerable<Vehicle>>? GetAllVehicles();
+        Task<IEnumerable<ElectricVehicle>?> GetAllElectricVehicles();
+        Task<IEnumerable<FossilFuelVehicle>?> GetAllFossilFuelVehicles();
+        Task<IEnumerable<Client>?> GetAllClients();
+        Task<IEnumerable<Rent>?> GetAllRents();
 
         bool DeleteVehicle(int ID);
         bool DeleteClient(int ID);
