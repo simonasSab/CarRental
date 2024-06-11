@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Net;
+using System.Linq;
 
 namespace Uzduotis01
 {
@@ -36,9 +37,9 @@ namespace Uzduotis01
         {
             if (!CacheCleaningON)
             {
-                Console.WriteLine($"Cache Cleaning: ON ({cachePeriod / 1000} s)\n");
+                Console.WriteLine($"Cache Cleaning: ON ({cachePeriod} s)\n");
                 CacheCleaningON = true;
-                MongoDBRepo.TruncateDatabaseStart(cachePeriod);
+                MongoDBRepo.TruncateDatabaseStart(cachePeriod * 1000);
             }
             else
             {
@@ -117,35 +118,52 @@ namespace Uzduotis01
             return false;
         }
 
-        public int DisplayAllVehicles()
+        //public int DisplayAllVehicles()
+        //{
+        //    int items = 0;
+        //    bool notEmpty = DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+
+        //    if (!notEmpty)
+        //    {
+        //        Console.WriteLine("There are no vehicles in the database\n");
+        //        return 0;
+        //    }
+
+        //    if (fossilFuelVehicles.Count() > 0)
+        //    {
+        //        foreach (FossilFuelVehicle fossilFuelVehicle in fossilFuelVehicles)
+        //        {
+        //            Console.WriteLine(fossilFuelVehicle.ToString());
+        //            items++;
+        //        }
+        //    }
+        //    if (electricVehicles.Count() > 0)
+        //    {
+        //        foreach (ElectricVehicle electricVehicle in electricVehicles)
+        //        {
+        //            Console.WriteLine(electricVehicle.ToString());
+        //            items++;
+        //        }
+        //    }
+        //    Console.WriteLine();
+        //    return items;
+        //}
+
+        public async Task<int> DisplayAllVehiclesAsync()
         {
-            int items = 0;
-            bool notEmpty = DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+            int count = 0;
+            List<Vehicle>? vehicles = (await GetAllVehicles()).ToList();
 
-            if (!notEmpty)
-            {
-                Console.WriteLine("There are no vehicles in the database\n");
+            if (vehicles == null)
                 return 0;
-            }
 
-            if (fossilFuelVehicles.Count() > 0)
+            foreach (Vehicle vehicle in vehicles)
             {
-                foreach (FossilFuelVehicle fossilFuelVehicle in fossilFuelVehicles)
-                {
-                    Console.WriteLine(fossilFuelVehicle.ToString());
-                    items++;
-                }
-            }
-            if (electricVehicles.Count() > 0)
-            {
-                foreach (ElectricVehicle electricVehicle in electricVehicles)
-                {
-                    Console.WriteLine(electricVehicle.ToString());
-                    items++;
-                }
+                Console.WriteLine(vehicle.ToString());
+                count++;
             }
             Console.WriteLine();
-            return items;
+            return count;
         }
         public async Task<int> DisplayAllElectricVehiclesAsync()
         {
@@ -326,8 +344,21 @@ namespace Uzduotis01
             }
             else
             {
-                vehicles = (IEnumerable<Vehicle>)electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
                 await MongoDBRepo.ImportVehiclesAsync(electricVehicles, fossilFuelVehicles);
+
+                vehicles = electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
+                //vehicles.Concat((IEnumerable<Vehicle>)electricVehicles);
+                //vehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
+
+                //foreach (ElectricVehicle it in electricVehicles)
+                //{
+                //    vehicles = vehicles.Append((Vehicle)it);
+                //}
+                //foreach (FossilFuelVehicle it in fossilFuelVehicles)
+                //{
+                //    vehicles = vehicles.Append((Vehicle)it);
+                //}
+
                 return vehicles;
             }
         }
@@ -385,7 +416,7 @@ namespace Uzduotis01
         }
         public async Task<IEnumerable<Client>?> GetAllClients()
         {
-            List<Client>? clientsMongoDB = await MongoDBRepo.GetAllClientsAsync();
+            List<Client>? clientsMongoDB = (await MongoDBRepo.GetAllClientsAsync()).ToList();
             int mongoCount = clientsMongoDB.Count();
 
             if (mongoCount > 0)

@@ -34,9 +34,8 @@
                     "\n4. Display vehicles..." +
                     "\n5. Display clients..." +
                     "\n6. Display rents..." +
-                    "\n7. Toggle Cache Cleaning on/off" +
-                    "\n\n0. Quit.\n");
-
+                    "\n\n7. Toggle Cache Cleaning on/off" +
+                    "\n0. Quit.\n");
             do
             {
                 while (!Console.KeyAvailable)
@@ -81,7 +80,7 @@
                     if (RentService.GetCacheCleaningON())
                         RentService.ToggleCacheCleaning(0);
                     else
-                        RentService.ToggleCacheCleaning(SelectInteger(1000, 3600001));
+                        RentService.ToggleCacheCleaning(SelectInteger(1, 3601));
                     break;
                 default:
                     Console.WriteLine($"Unexpected error - program is quitting.");
@@ -102,7 +101,6 @@
                     "\n2. Display electric vehicles..." +
                     "\n3. Display fossil fuel vehicles..." +
                     "\n\n0. Go back.\n");
-
             do
             {
                 while (!Console.KeyAvailable) 
@@ -121,7 +119,7 @@
                     break;
                 case 49:
                 case 97: // Display all vehicles and open Vehicles Options Menu
-                    if (RentService.DisplayAllVehicles() == 0)
+                    if ((await RentService.DisplayAllVehiclesAsync()) == 0)
                         break;
                     else
                         await VehiclesOptionsMenu();
@@ -158,7 +156,6 @@
                     "\n2. Edit vehicle" +
                     "\n3. Delete vehicle" +
                     "\n\n0. Go back.\n");
-
             do
             {
                 while (!Console.KeyAvailable)
@@ -209,7 +206,6 @@
                   "\n\n1. Edit client" +
                     "\n2. Delete client" +
                     "\n\n0. Go back.\n");
-
             do
             {
                 while (!Console.KeyAvailable)
@@ -255,7 +251,6 @@
                   "\n\n1. Edit rent" +
                     "\n2. Delete rent" +
                     "\n\n0. Go back.\n");
-
             do
             {
                 while (!Console.KeyAvailable)

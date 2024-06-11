@@ -17,7 +17,6 @@ namespace Uzduotis01
 
         private CancellationTokenSource CacheCleanCTSource { get; set; }
         private CancellationToken CToken { get; set; }
-
         private IMongoDatabase MongoDatabase { get; set; }
 
         public MongoDBRepository(IMongoClient mongoClient)
@@ -97,6 +96,13 @@ namespace Uzduotis01
         {
             return await _vehicles.Find(_ => true).ToListAsync();
         }
+        public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync(string phrase)
+        {
+            FilterDefinition<Vehicle> filter = Builders<Vehicle>.Filter.Regex("Make", new BsonRegularExpression(phrase, "i"));
+            filter &= Builders<Vehicle>.Filter.Regex("Model", new BsonRegularExpression(phrase, "i"));
+
+            return await _vehicles.Find(filter).SortBy(x => x.GetMake()).ThenBy(x => x.GetModel()).ToListAsync();
+        }
 
         public async Task<IEnumerable<ElectricVehicle>> GetAllElectricVehiclesAsync()
         {
@@ -125,9 +131,16 @@ namespace Uzduotis01
             return vehicles;
         }
 
-        public async Task<List<Client>> GetAllClientsAsync()
+        public async Task<IEnumerable<Client>> GetAllClientsAsync()
         {
             return await _clients.Find(_ => true).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Client>> GetAllClientsAsync(string phrase)
+        {
+            FilterDefinition<Client> filter = Builders<Client>.Filter.Regex("FullName", new BsonRegularExpression(phrase, "i"));
+
+            return await _clients.Find(filter).SortBy(x => x.GetFullName()).ToListAsync();
         }
 
         public async Task<IEnumerable<Rent>> GetAllRentsAsync()

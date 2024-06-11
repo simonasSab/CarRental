@@ -10,7 +10,7 @@
         Task<bool> RegisterClient(Client client);
         Task<bool> RegisterRent(Rent rent);
 
-        int DisplayAllVehicles();
+        Task<int> DisplayAllVehiclesAsync();
         Task<int> DisplayAllElectricVehiclesAsync();
         Task<int> DisplayAllFossilFuelVehiclesAsync();
         Task<int> DisplayAllClientsAsync();
