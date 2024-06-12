@@ -78,9 +78,27 @@ namespace Uzduotis01
             }
             return false;
         }
+        // _________________________________________________________________________________________
+
+        // Not Entity Framework:
+        //public async Task<bool> RegisterClient(Client client)
+        //{
+        //    if (DatabaseRepo.InsertClient(client, out Client newClient))
+        //    {
+        //        Console.WriteLine($"New client: {newClient.ToString()}");
+
+        //        if (await MongoDBRepo.InsertClientAsync(newClient))
+        //            Console.WriteLine($"Inserted to MongoDB successfully.\n");
+        //        else
+        //            Console.WriteLine($"Failed to insert to MongoDB.\n");
+
+        //        return true;
+        //    }
+        //    return false;
+        //}
         public async Task<bool> RegisterClient(Client client)
         {
-            if (DatabaseRepo.InsertClient(client, out Client newClient))
+            if (DatabaseRepo.InsertClientEF(client, out Client newClient))
             {
                 Console.WriteLine($"New client: {newClient.ToString()}");
 
@@ -93,6 +111,8 @@ namespace Uzduotis01
             }
             return false;
         }
+        // _________________________________________________________________________________________
+
         public async Task<bool> RegisterRent(Rent rent)
         {
             if (RentIsPossible(rent))
@@ -229,11 +249,26 @@ namespace Uzduotis01
                 return null;
             }
         }
+
+        // _________________________________________________________________________________________
+        // Not Entity Framework:
+        //public Client? GetClient(int ID)
+        //{
+        //    if (ClientsIDExists(ID))
+        //    {
+        //        return DatabaseRepo.GetClient(ID);
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine($"Client not found with ID {ID:000}");
+        //        return null;
+        //    }
+        //}
         public Client? GetClient(int ID)
         {
             if (ClientsIDExists(ID))
             {
-                return DatabaseRepo.GetClient(ID);
+                return DatabaseRepo.GetClientEF(ID);
             }
             else
             {
@@ -241,6 +276,10 @@ namespace Uzduotis01
                 return null;
             }
         }
+
+        // _________________________________________________________________________________________
+
+
         public Rent? GetRent(int ID)
         {
             if (RentsIDExists(ID))
@@ -347,6 +386,35 @@ namespace Uzduotis01
             await MongoDBRepo.ImportVehiclesAsync(vehicles);
             return vehicles;
         }
+
+        // _________________________________________________________________________________________
+        // Not Entity Framework
+        //public async Task<IEnumerable<Client>?> GetAllClients()
+        //{
+        //    List<Client>? clientsMongoDB = (await MongoDBRepo.GetAllClientsAsync()).ToList();
+        //    int mongoCount = clientsMongoDB.Count();
+
+        //    if (mongoCount > 0)
+        //    {
+        //        Console.WriteLine($"Successfully retrieved {mongoCount} clients from MongoDB cache\n");
+        //        return clientsMongoDB;
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine($"MongoDB cache is empty, synchronizing...\n");
+        //    }
+
+        //    IEnumerable<Client> clients = DatabaseRepo.GetAllClients();
+
+        //    if (clients.Count() < 1)
+        //    {
+        //        Console.WriteLine("There are no clients in the database\n");
+        //        return null;
+        //    }
+
+        //    await MongoDBRepo.ImportClientsAsync(clients);
+        //    return clients;
+        //}
         public async Task<IEnumerable<Client>?> GetAllClients()
         {
             List<Client>? clientsMongoDB = (await MongoDBRepo.GetAllClientsAsync()).ToList();
@@ -362,7 +430,7 @@ namespace Uzduotis01
                 Console.WriteLine($"MongoDB cache is empty, synchronizing...\n");
             }
 
-            IEnumerable<Client> clients = DatabaseRepo.GetAllClients();
+            IEnumerable<Client> clients = DatabaseRepo.GetAllClientsEF();
 
             if (clients.Count() < 1)
             {
@@ -373,6 +441,9 @@ namespace Uzduotis01
             await MongoDBRepo.ImportClientsAsync(clients);
             return clients;
         }
+
+        // _________________________________________________________________________________________
+
         public async Task<IEnumerable<Rent>?> GetAllRents()
         {
             IEnumerable<Rent> rentsMongoDB = await MongoDBRepo.GetAllRentsAsync();
@@ -442,6 +513,35 @@ namespace Uzduotis01
                 return vehicles;
             }
         }
+
+        // _________________________________________________________________________________________
+        // Not Entity Framework
+        //public async Task<IEnumerable<Client>?> GetAllClients(string phrase)
+        //{
+        //    List<Client>? clientsMongoDB = (await MongoDBRepo.GetAllClientsAsync(phrase)).ToList();
+        //    int mongoCount = clientsMongoDB.Count();
+
+        //    if (mongoCount > 0)
+        //    {
+        //        Console.WriteLine($"Found {mongoCount} clients by phrase \"{phrase}\" from MongoDB cache\n");
+        //        return clientsMongoDB;
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine("Nothing found in MongoDB, trying SQL Database...\n");
+        //    }
+
+        //    IEnumerable<Client> clients = DatabaseRepo.GetAllClients(phrase);
+
+        //    if (clients.Count() < 1)
+        //    {
+        //        Console.WriteLine($"No clients found by phrase \"{phrase}\" in the database\n");
+        //        return null;
+        //    }
+
+        //    await MongoDBRepo.ImportClientsAsync(clients);
+        //    return clients;
+        //}
         public async Task<IEnumerable<Client>?> GetAllClients(string phrase)
         {
             List<Client>? clientsMongoDB = (await MongoDBRepo.GetAllClientsAsync(phrase)).ToList();
@@ -457,7 +557,7 @@ namespace Uzduotis01
                 Console.WriteLine("Nothing found in MongoDB, trying SQL Database...\n");
             }
 
-            IEnumerable<Client> clients = DatabaseRepo.GetAllClients(phrase);
+            IEnumerable<Client> clients = DatabaseRepo.GetAllClientsEF(phrase);
 
             if (clients.Count() < 1)
             {
@@ -468,6 +568,8 @@ namespace Uzduotis01
             await MongoDBRepo.ImportClientsAsync(clients);
             return clients;
         }
+
+        // _________________________________________________________________________________________
 
         public bool DeleteVehicle(int ID)
         {

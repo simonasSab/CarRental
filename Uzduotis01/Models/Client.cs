@@ -1,14 +1,28 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Uzduotis01
 {
+    [Table("Clients")]
     public class Client
     {
+        [Key] [Column("ID")]
         public int ID { get; set; }
+        [Column("FullName")]
         public string FullName { get; set; }
+        [Column("PersonalID")]
         public long PersonalID { get; set; }
+        [Column("RegistrationDateTime")]
         public DateTime RegistrationDateTime { get; set; }
+        [NotMapped]
         [BsonId] ObjectId mongoID { get; set; }
 
         public Client()

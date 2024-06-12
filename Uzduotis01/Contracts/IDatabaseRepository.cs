@@ -26,5 +26,11 @@
         bool UpdateVehicle(object? vehicle, out object updatedVehicle);
         bool UpdateClient(Client? client, out Client updatedClient);
         bool UpdateRent(Rent? rent, out Rent updatedRent);
+
+        // Entity Framework
+        bool InsertClientEF(Client client, out Client newClient);
+        Client? GetClientEF(int ID);
+        IEnumerable<Client> GetAllClientsEF();
+        IEnumerable<Client> GetAllClientsEF(string phrase); // For search
     }
 }

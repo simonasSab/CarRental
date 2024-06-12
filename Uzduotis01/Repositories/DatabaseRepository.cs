@@ -2,6 +2,8 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Net;
+using System.Text.RegularExpressions;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Uzduotis01
 {
@@ -9,9 +11,11 @@ namespace Uzduotis01
     public class DatabaseRepository : IDatabaseRepository
     {
         private readonly string _connectionString;
+        private RentDBContext _dbContext;
         public DatabaseRepository(string connectionString)
         {
             _connectionString = connectionString;
+            _dbContext = new();
         }
 
         private void DeleteOldRents()
@@ -593,6 +597,35 @@ namespace Uzduotis01
                 updatedRent = db.QueryFirst<Rent>(sql3, new { id });
                 return true;
             }
+        }
+
+
+        // Entity Framework
+
+        public bool InsertClientEF(Client client, out Client newClient)
+        {
+            newClient = client;
+            var changes = _dbContext.Add(client);
+            _dbContext.SaveChanges();
+            if (client.PersonalID > 0)
+            {
+                newClient = client;
+                return true;
+            }
+            return false;
+        }
+        public Client? GetClientEF(int ID)
+        {
+            return _dbContext.Clients.Find(ID);
+        }
+        public IEnumerable<Client> GetAllClientsEF()
+        {
+            return _dbContext.Clients.ToList();
+        }
+        public IEnumerable<Client> GetAllClientsEF(string phrase)
+        {
+            Regex? rx = new("*phrase*", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+            return _dbContext.Clients.Where(x => rx.IsMatch(x.FullName)).ToList();
         }
     }
 }
