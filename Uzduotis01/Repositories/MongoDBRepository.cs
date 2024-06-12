@@ -6,6 +6,8 @@ using MongoDB.Driver;
 using System.Collections.Generic;
 using Amazon.Auth.AccessControlPolicy;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
+using Serilog;
 
 namespace Uzduotis01
 {
@@ -99,9 +101,11 @@ namespace Uzduotis01
         public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync(string phrase)
         {
             FilterDefinition<Vehicle> filter = Builders<Vehicle>.Filter.Regex("Make", new BsonRegularExpression(phrase, "i"));
-            filter &= Builders<Vehicle>.Filter.Regex("Model", new BsonRegularExpression(phrase, "i"));
+            filter |= Builders<Vehicle>.Filter.Regex("Model", new BsonRegularExpression(phrase, "i"));
 
-            return await _vehicles.Find(filter).SortBy(x => x.GetMake()).ThenBy(x => x.GetModel()).ToListAsync();
+            Log.Information($"Trying to find \"{phrase}\" in Vehicles...\n");
+
+            return await _vehicles.Find(filter).SortBy(x => x.Make).ThenBy(x => x.Model).ToListAsync();
         }
 
         public async Task<IEnumerable<ElectricVehicle>> GetAllElectricVehiclesAsync()
@@ -140,7 +144,9 @@ namespace Uzduotis01
         {
             FilterDefinition<Client> filter = Builders<Client>.Filter.Regex("FullName", new BsonRegularExpression(phrase, "i"));
 
-            return await _clients.Find(filter).SortBy(x => x.GetFullName()).ToListAsync();
+            Log.Information($"Trying to find \"{phrase}\" in Clients...\n");
+
+            return await _clients.Find(filter).SortBy(x => x.FullName).ToListAsync();
         }
 
         public async Task<IEnumerable<Rent>> GetAllRentsAsync()

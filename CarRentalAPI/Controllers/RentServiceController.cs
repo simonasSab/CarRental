@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Data;
 using MongoDB.Driver;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace CarRentalAPI
 {
@@ -20,34 +21,50 @@ namespace CarRentalAPI
             _rentService = rentService;
         }
 
+        // Search ____________________________________________________________________________
+        // ___________________________________________________________________________________
+
+        [HttpGet("SearchAllVehiclesAsync")]
+        public async Task<IEnumerable<Vehicle>?> GetAllVehiclesAsync(string phrase)
+        {
+            return await _rentService.GetAllVehicles(phrase);
+        }
+        [HttpGet("SearchAllClientsAsync")]
+        public async Task<IEnumerable<Client>?> GetAllClientsAsync(string phrase)
+        {
+            return await _rentService.GetAllClients(phrase);
+        }
+
+        // ___________________________________________________________________________________
+        // ___________________________________________________________________________________
+
         // HttpGet methods
 
-        [HttpGet("GetAllVehicles")]
-        public IEnumerable<Vehicle>? GetAllVehicles()
+        [HttpGet("GetAllVehiclesAsync")]
+        public async Task<IEnumerable<Vehicle>?> GetAllVehiclesAsync()
         {
-            return _rentService.GetAllVehicles();
+            return await _rentService.GetAllVehicles();
         }
-        [HttpGet("GetAllElectricVehicles")]
-        public async Task<IEnumerable<ElectricVehicle>?> GetAllElectricVehicles()
+        [HttpGet("GetAllElectricVehiclesAsync")]
+        public async Task<IEnumerable<ElectricVehicle>?> GetAllElectricVehiclesAsync()
         {
             return await _rentService.GetAllElectricVehicles();
         }
-        [HttpGet("GetAllFossilFuelVehicles")]
-        public async Task<IEnumerable<FossilFuelVehicle>?> GetAllFossilFuelVehicles()
+        [HttpGet("GetAllFossilFuelVehiclesAsync")]
+        public async Task<IEnumerable<FossilFuelVehicle>?> GetAllFossilFuelVehiclesAsync()
         {
             return await _rentService.GetAllFossilFuelVehicles();
         }
-        [HttpGet("GetAllClients")]
-        public async Task<IEnumerable<Client>?> GetAllClients()
+        [HttpGet("GetAllClientsAsync")]
+        public async Task<IEnumerable<Client>?> GetAllClientsAsync()
         {
             return await _rentService.GetAllClients();
         }
-        [HttpGet("GetAllRents")]
-        public async Task<IEnumerable<Rent>?> GetAllRents()
+        [HttpGet("GetAllRentsAsync")]
+        public async Task<IEnumerable<Rent>?> GetAllRentsAsync()
         {
             return await _rentService.GetAllRents();
         }
-
 
         [HttpGet("GetVehicle")]
         public Vehicle GetVehicle(int id)

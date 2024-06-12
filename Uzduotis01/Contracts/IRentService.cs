@@ -21,9 +21,11 @@
         Client? GetClient(int ID);
         Rent? GetRent(int ID);
         Task<IEnumerable<Vehicle>>? GetAllVehicles();
+        Task<IEnumerable<Vehicle>>? GetAllVehicles(string phrase);
         Task<IEnumerable<ElectricVehicle>?> GetAllElectricVehicles();
         Task<IEnumerable<FossilFuelVehicle>?> GetAllFossilFuelVehicles();
         Task<IEnumerable<Client>?> GetAllClients();
+        Task<IEnumerable<Client>?> GetAllClients(string phrase);
         Task<IEnumerable<Rent>?> GetAllRents();
 
         bool DeleteVehicle(int ID);

@@ -47,6 +47,31 @@ namespace Uzduotis01
                 return true;
             }
         }
+        public bool GetAllVehicles(string phrase, out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles)
+        {
+            using (IDbConnection db = new SqlConnection(_connectionString))
+            {
+                const string sql1 = @"
+                    SELECT v.ID, v.Make, v.Model, v.ProductionYear, v.VIN, e.BatteryCapacity
+                    FROM Vehicles v INNER JOIN ElectricVehicles e ON v.ID = e.ID
+                    WHERE v.Make LIKE(@phrase) OR v.Model LIKE(@phrase)
+                    ORDER BY v.ID;";
+                const string sql2 = @"
+                    SELECT v.ID, v.Make, v.Model, v.ProductionYear, v.VIN, f.TankCapacity
+                    FROM Vehicles v INNER JOIN FossilFuelVehicles f ON v.ID = f.ID
+                    WHERE v.Make LIKE('%@phrase%') OR v.Model LIKE('%@phrase%')
+                    ORDER BY v.ID;";
+
+                electricVehicles = db.Query<ElectricVehicle>(sql1, new { phrase = $"%{phrase}%" });
+                fossilFuelVehicles = db.Query<FossilFuelVehicle>(sql2, new { phrase = $"%{phrase}%" });
+
+                if (electricVehicles.Count() < 1 && fossilFuelVehicles.Count() < 1)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
         public IEnumerable<Vehicle>? GetAllVehicles(bool isElectric)
         {
             using (IDbConnection db = new SqlConnection(_connectionString))
@@ -89,6 +114,23 @@ namespace Uzduotis01
                 SELECT * FROM Clients ORDER BY ID";
 
                 IEnumerable<Client>? clients = db.Query<Client>(sql);
+                if (clients.Count() < 1)
+                {
+                    return null;
+                }
+                return clients;
+            }
+        }
+        public IEnumerable<Client>? GetAllClients(string phrase)
+        {
+            using (IDbConnection db = new SqlConnection(_connectionString))
+            {
+                const string sql = @"
+                SELECT * FROM Clients
+                WHERE FullName LIKE (@phrase)
+                ORDER BY ID";
+
+                IEnumerable<Client>? clients = db.Query<Client>(sql, new { phrase = $"%{phrase}%" });
                 if (clients.Count() < 1)
                 {
                     return null;

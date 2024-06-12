@@ -3,8 +3,10 @@
     public interface IDatabaseRepository
     {
         bool GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+        bool GetAllVehicles(string phrase, out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles); // For search
         IEnumerable<Vehicle> GetAllVehicles(bool isElectric);
         IEnumerable<Client> GetAllClients();
+        IEnumerable<Client> GetAllClients(string phrase); // For search
         IEnumerable<Rent> GetAllRents();
         IEnumerable<Rent>? GetAllRents(int vehicleID);
 

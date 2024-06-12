@@ -32,7 +32,6 @@ namespace Uzduotis01
         {
             return CacheCleaningON;
         }
-
         public void ToggleCacheCleaning(int cachePeriod)
         {
             if (!CacheCleaningON)
@@ -117,37 +116,6 @@ namespace Uzduotis01
             }
             return false;
         }
-
-        //public int DisplayAllVehicles()
-        //{
-        //    int items = 0;
-        //    bool notEmpty = DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
-
-        //    if (!notEmpty)
-        //    {
-        //        Console.WriteLine("There are no vehicles in the database\n");
-        //        return 0;
-        //    }
-
-        //    if (fossilFuelVehicles.Count() > 0)
-        //    {
-        //        foreach (FossilFuelVehicle fossilFuelVehicle in fossilFuelVehicles)
-        //        {
-        //            Console.WriteLine(fossilFuelVehicle.ToString());
-        //            items++;
-        //        }
-        //    }
-        //    if (electricVehicles.Count() > 0)
-        //    {
-        //        foreach (ElectricVehicle electricVehicle in electricVehicles)
-        //        {
-        //            Console.WriteLine(electricVehicle.ToString());
-        //            items++;
-        //        }
-        //    }
-        //    Console.WriteLine();
-        //    return items;
-        //}
 
         public async Task<int> DisplayAllVehiclesAsync()
         {
@@ -285,30 +253,8 @@ namespace Uzduotis01
                 return null;
             }
         }
-        //public IEnumerable<Vehicle>? GetAllVehicles()
-        //{
-        //    bool hasEntries = DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
 
-        //    if (!hasEntries)
-        //    {
-        //        Console.WriteLine("There are no vehicles in the database\n");
-        //        return null;
-        //    }
-
-        //    if (fossilFuelVehicles.Count() < 1)
-        //    {
-        //        return electricVehicles;
-        //    }
-        //    else if (electricVehicles.Count() < 1)
-        //    {
-        //        return fossilFuelVehicles;
-        //    }
-        //    else
-        //    {
-        //        return (IEnumerable<Vehicle>?)electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
-        //    }
-        //}
-
+        // Get all items
         public async Task<IEnumerable<Vehicle>>? GetAllVehicles()
         {
             IEnumerable<Vehicle> vehicles = await MongoDBRepo.GetAllVehiclesAsync();
@@ -316,7 +262,7 @@ namespace Uzduotis01
 
             if (mongoCount > 0)
             {
-                Console.WriteLine($"Successfully retrieved {mongoCount} electric vehicles from MongoDB cache\n");
+                Console.WriteLine($"Successfully retrieved {mongoCount} vehicles from MongoDB cache\n");
                 return vehicles;
             }
             else
@@ -345,20 +291,7 @@ namespace Uzduotis01
             else
             {
                 await MongoDBRepo.ImportVehiclesAsync(electricVehicles, fossilFuelVehicles);
-
                 vehicles = electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
-                //vehicles.Concat((IEnumerable<Vehicle>)electricVehicles);
-                //vehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
-
-                //foreach (ElectricVehicle it in electricVehicles)
-                //{
-                //    vehicles = vehicles.Append((Vehicle)it);
-                //}
-                //foreach (FossilFuelVehicle it in fossilFuelVehicles)
-                //{
-                //    vehicles = vehicles.Append((Vehicle)it);
-                //}
-
                 return vehicles;
             }
         }
@@ -395,7 +328,7 @@ namespace Uzduotis01
 
             if (mongoCount > 0)
             {
-                Console.WriteLine($"Successfully retrieved {mongoCount} electric vehicles from MongoDB cache\n");
+                Console.WriteLine($"Successfully retrieved {mongoCount} fossil fuel vehicles from MongoDB cache\n");
                 return vehiclesMongoDB;
             }
             else
@@ -467,6 +400,74 @@ namespace Uzduotis01
             return rents;
         }
 
+        // Search items in MongoDB and SQL Server by phrase.
+        // If MongoDB has matches, return info from it, else search in SQL Server
+        public async Task<IEnumerable<Vehicle>>? GetAllVehicles(string phrase)
+        {
+            IEnumerable<Vehicle> vehicles = await MongoDBRepo.GetAllVehiclesAsync(phrase);
+            int mongoCount = vehicles.Count();
+
+            if (mongoCount > 0)
+            {
+                Console.WriteLine($"Found {mongoCount} vehicles by phrase \"{phrase}\" from MongoDB cache\n");
+                return vehicles;
+            }
+            else
+            {
+                Console.WriteLine("Nothing found in MongoDB, trying SQL Database...\n");
+            }
+
+            bool hasEntries = DatabaseRepo.GetAllVehicles(phrase, out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+
+            if (!hasEntries)
+            {
+                Console.WriteLine($"No vehicles found by phrase \"{phrase}\" in the database\n");
+                return null;
+            }
+
+            if (fossilFuelVehicles.Count() == 0)
+            {
+                await MongoDBRepo.ImportVehiclesAsync(electricVehicles);
+                return electricVehicles;
+            }
+            else if (electricVehicles.Count() == 0)
+            {
+                await MongoDBRepo.ImportVehiclesAsync(fossilFuelVehicles);
+                return fossilFuelVehicles;
+            }
+            else
+            {
+                await MongoDBRepo.ImportVehiclesAsync(electricVehicles, fossilFuelVehicles);
+                vehicles = electricVehicles.Concat((IEnumerable<Vehicle>)fossilFuelVehicles);
+                return vehicles;
+            }
+        }
+        public async Task<IEnumerable<Client>?> GetAllClients(string phrase)
+        {
+            List<Client>? clientsMongoDB = (await MongoDBRepo.GetAllClientsAsync(phrase)).ToList();
+            int mongoCount = clientsMongoDB.Count();
+
+            if (mongoCount > 0)
+            {
+                Console.WriteLine($"Found {mongoCount} clients by phrase \"{phrase}\" from MongoDB cache\n");
+                return clientsMongoDB;
+            }
+            else
+            {
+                Console.WriteLine("Nothing found in MongoDB, trying SQL Database...\n");
+            }
+
+            IEnumerable<Client> clients = DatabaseRepo.GetAllClients(phrase);
+
+            if (clients.Count() < 1)
+            {
+                Console.WriteLine($"No clients found by phrase \"{phrase}\" in the database\n");
+                return null;
+            }
+
+            await MongoDBRepo.ImportClientsAsync(clients);
+            return clients;
+        }
 
         public bool DeleteVehicle(int ID)
         {
