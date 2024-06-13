@@ -3,7 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Net;
 using System.Text.RegularExpressions;
-using static System.Reflection.Metadata.BlobBuilder;
+using Serilog;
 
 namespace Uzduotis01
 {
@@ -142,37 +142,51 @@ namespace Uzduotis01
                 return clients;
             }
         }
-        public IEnumerable<Rent>? GetAllRents()
+        public IEnumerable<Rent> GetAllRents()
         {
             DeleteOldRents();
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
                 const string sql = @"
                 SELECT * FROM Rents ORDER BY ID";
-
-                IEnumerable<Rent>? rents = db.Query<Rent>(sql);
-                if (rents.Count() < 1)
-                {
-                    return null;
-                }
+                IEnumerable<Rent> rents = db.Query<Rent>(sql);
                 return rents;
             }
         }
-        public IEnumerable<Rent>? GetAllRents(int vehicleID)
+        public IEnumerable<Rent>? GetAllRents(int? itemID, bool vehicleTrueBicycleFalse)
         {
             DeleteOldRents();
-            using (IDbConnection db = new SqlConnection(_connectionString))
+            if (vehicleTrueBicycleFalse)
             {
-                const string sql = @"
-                SELECT * FROM Rents WHERE VehicleID = @vehicleID";
-
-                IEnumerable<Rent>? rents = db.Query<Rent>(sql, new { vehicleID });
-                if (rents.Count() < 1)
+                using (IDbConnection db = new SqlConnection(_connectionString))
                 {
-                    return null;
+                    const string sql = @"
+                    SELECT * FROM Rents WHERE VehicleID = @itemID";
+
+                    IEnumerable<Rent>? rents = db.Query<Rent>(sql, new { itemID });
+                    if (rents.Count() < 1)
+                    {
+                        return null;
+                    }
+                    return rents;
                 }
-                return rents;
             }
+            else
+            {
+                using (IDbConnection db = new SqlConnection(_connectionString))
+                {
+                    const string sql = @"
+                    SELECT * FROM Rents WHERE BicycleID = @itemID";
+
+                    IEnumerable<Rent>? rents = db.Query<Rent>(sql, new { itemID });
+                    if (rents.Count() < 1)
+                    {
+                        return null;
+                    }
+                    return rents;
+                }
+            }
+            
         }
 
         public Vehicle GetVehicle(int ID)
@@ -235,7 +249,7 @@ namespace Uzduotis01
                 if (db.Execute(sql3, new { id, batteryCapacity }) > 0)
                     return true;
             }
-            Console.WriteLine("Unexpected error: insertion not performed\n");
+            Log.Error("Unexpected error: insertion not performed\n");
             return false;
         }
         public bool InsertVehicle(FossilFuelVehicle vehicle, out FossilFuelVehicle newVehicle)
@@ -261,14 +275,14 @@ namespace Uzduotis01
                 if (db.Execute(sql3, new { id, tankCapacity }) > 0)
                     return true;
             }
-            Console.WriteLine("Unexpected error: insertion not performed\n");
+            Log.Error("Unexpected error: insertion not performed\n");
             return false;
         }
         public bool InsertClient(Client client, out Client newClient)
         {
             newClient = client;
             string fullName = client.GetFullName();
-            long personalID = client.GetPersonalID();
+            decimal personalID = client.GetPersonalID();
 
             if (personalID != 0)
             {
@@ -282,7 +296,7 @@ namespace Uzduotis01
                         return true;
                     }
                 }
-                Console.WriteLine("Unexpected error: insertion not performed\n");
+                Log.Error("Unexpected error: insertion not performed\n");
                 return false;
             }
 
@@ -296,7 +310,7 @@ namespace Uzduotis01
                     return true;
                 }
             }
-            Console.WriteLine("Unexpected error: insertion not performed\n");
+            Log.Error("Unexpected error: insertion not performed\n");
             return false;
         }
         public bool InsertRent(Rent rent, out Rent newRent)
@@ -330,7 +344,7 @@ namespace Uzduotis01
                     }
                 }
             }
-            Console.WriteLine("Unexpected error: insertion not performed\n");
+            Log.Error("Unexpected error: insertion not performed\n");
             return false;
         }
 
@@ -343,7 +357,7 @@ namespace Uzduotis01
                 {
                     if (rent.GetVehicleID() == ID)
                     {
-                        Console.WriteLine("The car is still being rented and cannot be deleted\n");
+                        Log.Error("The car is still being rented and cannot be deleted\n");
                         return false;
                     }
                 }
@@ -359,7 +373,7 @@ namespace Uzduotis01
                         DELETE FROM ElectricVehicles WHERE ID = @ID";
                         if (db1.Execute(sql1, new { ID }) == 0)
                         {
-                            Console.WriteLine("ID was not deleted from Electric Vehicles\n"); // just in case, shouldn't happen
+                            Log.Error("ID was not deleted from Electric Vehicles\n"); // just in case, shouldn't happen
                             return false;
                         }
                     }
@@ -373,7 +387,7 @@ namespace Uzduotis01
                         }
                         else
                         {
-                            Console.WriteLine("ERROR: ID was not deleted from Vehicles\n");
+                            Log.Error("ERROR: ID was not deleted from Vehicles\n");
                             return false;
                         }
                     }
@@ -390,7 +404,7 @@ namespace Uzduotis01
                         DELETE FROM FossilFuelVehicles WHERE ID = @ID";
                         if (db1.Execute(sql1, new { ID }) == 0)
                         {
-                            Console.WriteLine("ID was not deleted from Fossil Fuel Vehicles\n"); // just in case, shouldn't happen
+                            Log.Error("ID was not deleted from Fossil Fuel Vehicles\n"); // just in case, shouldn't happen
                             return false;
                         }
                     }
@@ -404,13 +418,13 @@ namespace Uzduotis01
                         }
                         else
                         {
-                            Console.WriteLine("ERROR: ID was not deleted from Vehicles\n");
+                            Log.Error("ERROR: ID was not deleted from Vehicles\n");
                             return false;
                         }
                     }
                 }
             }
-            Console.WriteLine("Unexpected error: deletion not performed\n");
+            Log.Error("Unexpected error: deletion not performed\n");
             return false;
         }
         public bool DeleteClient(int ID)
@@ -422,7 +436,7 @@ namespace Uzduotis01
                 {
                     if (rent.GetClientID() == ID)
                     {
-                        Console.WriteLine("The client is still renting a car and cannot be deleted\n");
+                        Log.Error("The client is still renting a car and cannot be deleted\n");
                         return false;
                     }
                 }
@@ -435,9 +449,9 @@ namespace Uzduotis01
                 if (db.Execute(sql, new { ID }) > 0)
                     return true;
                 else
-                    Console.WriteLine("ERROR: ID was not deleted from Clients\n");
+                    Log.Error("ERROR: ID was not deleted from Clients\n");
             }
-            Console.WriteLine("Unexpected error: deletion not performed\n");
+            Log.Error("Unexpected error: deletion not performed\n");
             return false;
         }
         public bool DeleteRent(int ID)
@@ -449,9 +463,9 @@ namespace Uzduotis01
                 if (db.Execute(sql, new { ID }) > 0)
                     return true;
                 else
-                    Console.WriteLine("ID was not deleted from Rents\n");
+                    Log.Error("ID was not deleted from Rents\n");
             }
-            Console.WriteLine("Unexpected error: deletion not performed\n");
+            Log.Error("Unexpected error: deletion not performed\n");
             return false;
         }
 
@@ -477,7 +491,7 @@ namespace Uzduotis01
                         WHERE ID = @id";
                     if (db1.Execute(sql1, new { make, model, productionYear, vin, id }) == 0)
                     {
-                        Console.WriteLine("ERROR: Vehicle was not updated\n");
+                        Log.Error("ERROR: Vehicle was not updated\n");
                         return false;
                     }
                 }
@@ -491,7 +505,7 @@ namespace Uzduotis01
 
                     if (db2.Execute(sql2, new { batteryCapacity, id }) == 0)
                     {
-                        Console.WriteLine("ERROR: Electric vehicle was not updated\n");
+                        Log.Error("ERROR: Electric vehicle was not updated\n");
                         return false;
                     }
 
@@ -517,7 +531,7 @@ namespace Uzduotis01
                         WHERE ID = @id";
                     if (db1.Execute(sql1, new { make, model, productionYear, vin, id }) == 0)
                     {
-                        Console.WriteLine("ERROR: Vehicle was not updated\n");
+                        Log.Error("ERROR: Vehicle was not updated\n");
                         return false;
                     }
                 }
@@ -533,7 +547,7 @@ namespace Uzduotis01
                     WHERE ID = @id";
                     if (db2.Execute(sql2, new { tankCapacity, id }) == 0)
                     {
-                        Console.WriteLine("ERROR: Vehicle was not updated\n");
+                        Log.Error("ERROR: Vehicle was not updated\n");
                         return false;
                     }
 
@@ -543,7 +557,7 @@ namespace Uzduotis01
                     return true;
                 }
             }
-            Console.WriteLine("ERROR: Vehicle was neither Electric nor Fossil Fuel.\n");
+            Log.Error("ERROR: Vehicle was neither Electric nor Fossil Fuel.\n");
             return false;
         }
         public bool UpdateClient(Client? client, out Client updatedClient)
@@ -561,7 +575,7 @@ namespace Uzduotis01
                 WHERE ID = @ID";
                 if (db.Execute(sql, new { fullName = client.GetFullName(), personalID = client.GetPersonalID(), id }) == 0)
                 {
-                    Console.WriteLine("ERROR: Client was not updated\n");
+                    Log.Error("ERROR: Client was not updated\n");
                     return false;
                 }
 
@@ -589,7 +603,7 @@ namespace Uzduotis01
                 WHERE ID = @id";
                 if (db.Execute(sql, new { dateFrom, dateTo, id }) == 0)
                 {
-                    Console.WriteLine("ERROR: Rent was not updated\n");
+                    Log.Error("ERROR: Rent was not updated\n");
                     return false;
                 }
 
@@ -600,18 +614,61 @@ namespace Uzduotis01
         }
 
 
-        // Entity Framework
-
-        public bool InsertClientEF(Client client, out Client newClient)
+        // Entity Framework Client insert, update, delete, get by ID, get all, search
+        public bool InsertClientEF(Client? client, out Client newClient)
         {
             newClient = client;
-            var changes = _dbContext.Add(client);
+            if (client == null)
+                return false;
+
+            _dbContext.Add(client);
             _dbContext.SaveChanges();
             if (client.PersonalID > 0)
             {
                 newClient = client;
                 return true;
             }
+            return false;
+        }
+        public bool UpdateClientEF(Client? client, out Client updatedClient)
+        {
+            updatedClient = client;
+            if (client == null)
+                return false;
+
+            _dbContext.Add(client);
+            _dbContext.SaveChanges();
+            if (client.PersonalID > 0)
+            {
+                updatedClient = client;
+                return true;
+            }
+            return false;
+        }
+        public bool DeleteClientEF(int ID)
+        {
+            IEnumerable<Rent>? rents = GetAllRents();
+            if (rents != null)
+            {
+                foreach (Rent rent in rents)
+                {
+                    if (rent.GetClientID() == ID)
+                    {
+                        Log.Error("The client is still renting something and cannot be deleted\n");
+                        return false;
+                    }
+                }
+            }
+
+            Client? client = GetClientEF(ID);
+
+            _dbContext.Clients.Remove(client);
+            _dbContext.SaveChanges();
+
+            if (_dbContext.Clients.Any(x => x.ID == ID))
+                return true;
+            else
+                Log.Error("ERROR: ID was not deleted from Clients\n");
             return false;
         }
         public Client? GetClientEF(int ID)
@@ -625,7 +682,79 @@ namespace Uzduotis01
         public IEnumerable<Client> GetAllClientsEF(string phrase)
         {
             Regex? rx = new("*phrase*", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
-            return _dbContext.Clients.Where(x => rx.IsMatch(x.FullName)).ToList();
+            return _dbContext.Clients.Where(x => rx.IsMatch(Regex.Replace(x.FullName, @"\s+", ""))).ToList();
+        }
+
+
+        // Entity Framework Bicycle insert, update, get by ID, get all, search
+        public bool InsertBicycleEF(Bicycle? bicycle, out Bicycle newBicycle)
+        {
+            newBicycle = bicycle;
+            if (bicycle == null)
+                return false;
+
+            var changes = _dbContext.Add(bicycle);
+            _dbContext.SaveChanges();
+            if (bicycle.ID > 0)
+            {
+                newBicycle = bicycle;
+                return true;
+            }
+            return false;
+        }
+        public bool UpdateBicycleEF(Bicycle? bicycle, out Bicycle updatedBicycle)
+        {
+            updatedBicycle = bicycle;
+            if (bicycle == null)
+                return false;
+
+            _dbContext.Add(bicycle);
+            _dbContext.SaveChanges();
+            if (bicycle.ID > 0)
+            {
+                updatedBicycle = bicycle;
+                return true;
+            }
+            return false;
+        }
+        public bool DeleteBicycleEF(int ID)
+        {
+            IEnumerable<Rent>? rents = GetAllRents();
+            if (rents != null)
+            {
+                foreach (Rent rent in rents)
+                {
+                    if (rent.GetBicycleID() == ID)
+                    {
+                        Log.Error("The bicycle is still being rented cannot be deleted\n");
+                        return false;
+                    }
+                }
+            }
+
+            Bicycle? bicycle = GetBicycleEF(ID);
+
+            _dbContext.Bicycles.Remove(bicycle);
+            _dbContext.SaveChanges();
+
+            if (_dbContext.Bicycles.Any(x => x.ID == ID))
+                return true;
+            else
+                Log.Error("ERROR: ID was not deleted from Clients\n");
+            return false;
+        }
+        public Bicycle? GetBicycleEF(int ID)
+        {
+            return _dbContext.Bicycles.Find(ID);
+        }
+        public IEnumerable<Bicycle> GetAllBicyclesEF()
+        {
+            return _dbContext.Bicycles.ToList();
+        }
+        public IEnumerable<Bicycle> GetAllBicyclesEF(string phrase)
+        {
+            Regex? rx = new(Regex.Replace("*phrase*", @"\s+", ""), RegexOptions.IgnoreCase);
+            return _dbContext.Bicycles.Where(x => rx.IsMatch(Regex.Replace(x.Name, @"\s+", ""))).ToList();
         }
     }
 }

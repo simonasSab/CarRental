@@ -13,7 +13,8 @@ namespace Uzduotis01
         public string Model { get; set; }
         public int ProductionYear { get; set; }
         public string VIN { get; set; }
-        [BsonId] ObjectId mongoID { get; set; }
+        [BsonId]
+        ObjectId mongoID { get; set; }
 
         public Vehicle()
         {

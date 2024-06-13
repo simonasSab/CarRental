@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using MongoDB.Bson;
+using Serilog;
 
 namespace Uzduotis01
 {
@@ -13,37 +14,46 @@ namespace Uzduotis01
     public class Program
     {
         const string connectionUri = "mongodb+srv://simonasSab2:TqrPNQWAo0TRh7NL-@carrental.uoohtxo.mongodb.net/?retryWrites=true&w=majority&appName=CarRental";
-        static IDatabaseRepository databaseRepository { get; set; }
-        static IMongoDBRepository mongoDBRepository { get; set; }
-        static IRentService rentService { get; set; }
-        static RentConsoleUI rentConsoleUI { get; set; }
+        static IDatabaseRepository _databaseRepository { get; set; }
+        static IMongoDBRepository _mongoDBRepository { get; set; }
+        static IRentService _rentService { get; set; }
+        static RentConsoleUI _rentConsoleUI { get; set; }
 
         public static void Main(string[] args)
         {
-            // Create a new client and connect to the server
+            // Create Serilog configuration
+            ILogger log = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.File("logs/myapp.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+            Log.Logger = log;
+
+            // Setup MongoDB
+            // Create new client and connect to server
             var client = new MongoClient(connectionUri);
-            mongoDBRepository = new MongoDBRepository(client);
-            // Send a ping to confirm a successful connection
+            _mongoDBRepository = new MongoDBRepository(client);
+            // Ping to confirm successful connection
             try
             {
                 var result = client.GetDatabase("admin").RunCommand<BsonDocument>(new BsonDocument("ping", 1));
-                Console.WriteLine("Pinged your deployment. You successfully connected to MongoDB!\n");
+                Log.Information("Pinged your deployment. You successfully connected to MongoDB!\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Log.Error(ex.Message);
             }
 
-            databaseRepository = new DatabaseRepository("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;");
-            rentService = new RentService(databaseRepository, mongoDBRepository);
-            rentConsoleUI = new RentConsoleUI(rentService);
+            // Initialize server DB and other services
+            _databaseRepository = new DatabaseRepository("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;");
+            _rentService = new RentService(_databaseRepository, _mongoDBRepository);
+            _rentConsoleUI = new RentConsoleUI(_rentService);
 
             bool isDone = RunAsyncTasks().Result;
         }
 
         public static async Task<bool> RunAsyncTasks()
         {
-            await rentConsoleUI.MainMenu();
+            await _rentConsoleUI.MainMenu();
             return true;
         }
     }

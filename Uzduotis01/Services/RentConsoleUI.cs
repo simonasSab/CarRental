@@ -1,4 +1,6 @@
-﻿namespace Uzduotis01
+﻿using Serilog;
+
+namespace Uzduotis01
 {
     // Programos valdymui su konsole turi būti sukurta klasė (kaip servisas) NuomaConsoleUI (RentConsoleUI),
     // kuriame turi būti meniu, visi pasirinkimai išbandyti visą programos funkcionalumą.
@@ -23,18 +25,21 @@
         {
             ConsoleKeyInfo cki = new();
             ConsoleKey[] validKeys =
-                { ConsoleKey.NumPad0, ConsoleKey.NumPad1, ConsoleKey.NumPad2, ConsoleKey.NumPad3, ConsoleKey.NumPad4,
-                ConsoleKey.NumPad5, ConsoleKey.NumPad6, ConsoleKey.NumPad7, ConsoleKey.D0, ConsoleKey.D1, ConsoleKey.D2,
-                ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6, ConsoleKey.D7 };
+                { ConsoleKey.NumPad0, ConsoleKey.NumPad1, ConsoleKey.NumPad2, ConsoleKey.NumPad3,
+                ConsoleKey.NumPad4, ConsoleKey.NumPad5, ConsoleKey.NumPad6, ConsoleKey.NumPad7,
+                ConsoleKey.NumPad8, ConsoleKey.NumPad9, ConsoleKey.D0, ConsoleKey.D1, ConsoleKey.D2,
+                ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6, ConsoleKey.D7, ConsoleKey.D8, ConsoleKey.D9 };
 
             Console.WriteLine("~~~ CAR RENTAL \"NEW RANDOM\" ~~~" +
                   "\n\n1. Register a random electric vehicle" +
                     "\n2. Register a random fossil fuel vehicle" +
-                    "\n3. Register a random client" +
-                    "\n4. Display vehicles..." +
-                    "\n5. Display clients..." +
-                    "\n6. Display rents..." +
-                    "\n\n7. Toggle Cache Cleaning on/off" +
+                    "\n3. Register a random bicycle" +
+                    "\n4. Register a random client" +
+                    "\n5. Display vehicles..." +
+                    "\n6. Display bicycles..." +
+                    "\n7. Display clients..." +
+                    "\n8. Display rents..." +
+                  "\n\n9. Toggle Cache Cleaning on/off" +
                     "\n0. Quit.\n");
             do
             {
@@ -58,32 +63,38 @@
                 case 50:case 98: // Create and register random fossil fuel vehicle
                     await RentService.RegisterVehicle(NewRandomFossilFuelVehicle());
                     break;
-                case 51:case 99: // Create and register random client
+                case 51:case 99: // Create and register random bicycle
+                    await RentService.RegisterBicycle(NewRandomBicycle());
+                    break;
+                case 52:case 100: // Create and register random client
                     await RentService.RegisterClient(NewRandomClient());
                     break;
-                case 52:case 100: // Display Vehicles menu
+                case 53:case 101: // Display Vehicles menu
                     await VehiclesMenu();
                     break;
-                case 53:case 101: // Display all clients (Clients menu)
+                case 54:case 102: // Display Bicycles options menu
+                    await BicyclesOptionsMenu();
+                    break;
+                case 55:case 103: // Display all clients (Clients menu)
                     if ((await RentService.DisplayAllClientsAsync()) == 0)
                         break;
                     else
                         ClientsOptionsMenu();
                     break;
-                case 54:case 102: // Display all rents (Rents menu)
+                case 56:case 104: // Display all rents (Rents menu)
                     if ((await RentService.DisplayAllRentsAsync()) == 0)
                         break;
                     else
                         await RentsOptionsMenu();
                     break;
-                case 55:case 103: // Toggle Cache Cleaning on (with specific time period in ms) / off
+                case 57:case 105: // Toggle Cache Cleaning on (with specific time period in ms) / off
                     if (RentService.GetCacheCleaningON())
                         RentService.ToggleCacheCleaning(0);
                     else
                         RentService.ToggleCacheCleaning(SelectInteger(1, 3601));
                     break;
                 default:
-                    Console.WriteLine($"Unexpected error - program is quitting.");
+                    Log.Error($"Unexpected error - program is quitting.");
                     return;
             }
             await MainMenu();
@@ -139,7 +150,7 @@
                         await VehiclesOptionsMenu();
                     break;
                 default:
-                    Console.WriteLine($"Unexpected error - program is quitting.");
+                    Log.Error($"Unexpected error - program is quitting.");
                     return;
             }
         }
@@ -190,7 +201,62 @@
                         RentService.DeleteVehicle(id2);
                     break;
                 default:
-                    Console.WriteLine($"Unexpected error - program is quitting.");
+                    Log.Error($"Unexpected error - program is quitting.");
+                    return;
+            }
+        }
+
+        public async Task BicyclesOptionsMenu()
+        {
+            ConsoleKeyInfo cki = new();
+            ConsoleKey[] validKeys =
+                { ConsoleKey.NumPad0, ConsoleKey.NumPad1, ConsoleKey.NumPad2, ConsoleKey.NumPad3,
+                  ConsoleKey.D0, ConsoleKey.D1, ConsoleKey.D2, ConsoleKey.D3 };
+
+            Console.WriteLine("~~~ VEHICLES OPTIONS ~~~" +
+                  "\n\n1. Rent bicycle" +
+                    "\n2. Edit bicycle" +
+                    "\n3. Delete bicycle" +
+                    "\n\n0. Go back.\n");
+            do
+            {
+                while (!Console.KeyAvailable)
+                { }
+                cki = Console.ReadKey(false);
+            }
+            while (!validKeys.Contains(cki.Key));
+
+            int selection = (int)cki.Key;
+
+            switch (selection)
+            {
+                case 48:
+                case 96: // Go back
+                    Console.Clear();
+                    break;
+                case 49:
+                case 97: // Rent bicycle
+                    await RentService.RegisterRent(NewRent());
+                    Console.Clear();
+                    break;
+                case 50:
+                case 98: // Edit bicycle
+                    Bicycle? bicycle = UpdateBicycle(SelectBicycleID());
+                    Console.Clear();
+                    if (bicycle == null)
+                        break;
+                    else
+                        RentService.UpdateBicycle(bicycle);
+                    break;
+                case 51:
+                case 99: // Delete bicycle
+                    int id2 = SelectBicycleID();
+                    Console.Clear();
+                    if (id2 != -1)
+                        RentService.DeleteBicycle(id2);
+                    break;
+                default:
+                    Log.Error($"Unexpected error - program is quitting.");
                     return;
             }
         }
@@ -235,7 +301,7 @@
                         RentService.DeleteClient(id2);
                     break;
                 default:
-                    Console.WriteLine($"Unexpected error - program is quitting.");
+                    Log.Error($"Unexpected error - program is quitting.");
                     return;
             }
         }
@@ -279,7 +345,7 @@
                         RentService.DeleteRent(id2);
                     break;
                 default:
-                    Console.WriteLine($"Unexpected error - program is quitting.");
+                    Log.Error($"Unexpected error - program is quitting.");
                     return;
             }
         }
@@ -318,6 +384,21 @@
             FossilFuelVehicle vehicle = new(make, model, productionYear, tankCapacity);
 
             return vehicle;
+        }
+
+        public Bicycle NewRandomBicycle()
+        {
+            Random random = new();
+            // Get name
+            string name = Enum.GetName(typeof(Name), random.Next(91));
+
+            // Get productionYear
+            int productionYear = random.Next(1980, 2025);
+
+            // Create product and return it
+            Bicycle bicycle = new(name, productionYear);
+
+            return bicycle;
         }
 
         public Client NewRandomClient()
@@ -371,6 +452,26 @@
             }
         }
 
+        public Bicycle? UpdateBicycle(int id)
+        {
+            if (!RentService.BicyclesIDExists(id))
+                return null;
+
+            Console.Clear();
+            Console.WriteLine("Please provide bicycle name (manufacturer): \n");
+            string name = SelectString();
+            if (name == "-1")
+                return null;
+
+            Console.Clear();
+            Console.WriteLine("Please provide bicycle production year: \n");
+            int productionYear = SelectInteger(1900, 2025);
+            if (productionYear == -1)
+                return null;
+
+            return new Bicycle(id, name, productionYear);
+        }
+
         public Client? UpdateClient(int id)
         {
             if (!RentService.ClientsIDExists(id))
@@ -384,7 +485,7 @@
 
             Console.Clear();
             Console.WriteLine($"Enter an 11-digit personal ID number (Cancel: -1)\n");
-            long personalID = SelectPersonalID();
+            decimal personalID = SelectPersonalID();
             if (personalID == -1)
                 return null;
 
@@ -461,6 +562,26 @@
                 }
             }
             while (!isInt || !RentService.VehiclesIDExists(id, out isElectric));
+
+            Console.WriteLine();
+            return id;
+        }
+
+        public int SelectBicycleID()
+        {
+            int id;
+            bool isInt;
+            do
+            {
+                Console.WriteLine("\nEnter bicycle ID number... (Cancel: -1)\n");
+                isInt = int.TryParse(Console.ReadLine(), out id);
+                if (id == -1)
+                {
+                    Console.WriteLine("\nCancelled\n");
+                    return id;
+                }
+            }
+            while (!isInt || !RentService.BicyclesIDExists(id));
 
             Console.WriteLine();
             return id;
@@ -561,16 +682,16 @@
             return integer;
         }
 
-        public long SelectPersonalID()
+        public decimal SelectPersonalID()
         {
-            long minValueIncl = 10000000000;
-            long maxValueExcl = 99999999999;
-            long number;
+            decimal minValueIncl = 10000000000;
+            decimal maxValueExcl = 99999999999;
+            decimal number;
             bool isLong;
             do
             {
                 Console.WriteLine("(Cancel: -1)\n");
-                isLong = long.TryParse(Console.ReadLine(), out number);
+                isLong = decimal.TryParse(Console.ReadLine(), out number);
                 if (number == -1)
                 {
                     Console.WriteLine("\nCancelled\n");

@@ -19,11 +19,11 @@ namespace Uzduotis01
         [Column("FullName")]
         public string FullName { get; set; }
         [Column("PersonalID")]
-        public long PersonalID { get; set; }
+        public decimal PersonalID { get; set; }
         [Column("RegistrationDateTime")]
         public DateTime RegistrationDateTime { get; set; }
-        [NotMapped]
-        [BsonId] ObjectId mongoID { get; set; }
+        [NotMapped] [BsonId]
+        ObjectId mongoID { get; set; }
 
         public Client()
         {
@@ -36,14 +36,14 @@ namespace Uzduotis01
             PersonalID = 0;
             RegistrationDateTime = DateTime.MinValue;
         }
-        public Client(int id, string fullName, long personalID)
+        public Client(int id, string fullName, decimal personalID)
         {
             ID = id;
             FullName = fullName;
             PersonalID = personalID;
             RegistrationDateTime = DateTime.MinValue;
         }
-        public Client(int id, string fullName, long personalID, DateTime registrationDateTime)
+        public Client(int id, string fullName, decimal personalID, DateTime registrationDateTime)
         {
             ID = id;
             FullName = fullName;
@@ -63,7 +63,7 @@ namespace Uzduotis01
         {
             FullName = fullName;
         }
-        public long GetPersonalID()
+        public decimal GetPersonalID()
         {
             return PersonalID;
         }

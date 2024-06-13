@@ -3,12 +3,12 @@
     public interface IDatabaseRepository
     {
         bool GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
-        bool GetAllVehicles(string phrase, out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles); // For search
+        bool GetAllVehicles(string phrase, out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles); // Search
         IEnumerable<Vehicle> GetAllVehicles(bool isElectric);
         IEnumerable<Client> GetAllClients();
-        IEnumerable<Client> GetAllClients(string phrase); // For search
+        IEnumerable<Client> GetAllClients(string phrase); // Search
         IEnumerable<Rent> GetAllRents();
-        IEnumerable<Rent>? GetAllRents(int vehicleID);
+        IEnumerable<Rent>? GetAllRents(int? itemID, bool vehicleTrueBicycleFalse);
 
         Vehicle GetVehicle(int ID);
         Client GetClient(int ID);
@@ -27,10 +27,20 @@
         bool UpdateClient(Client? client, out Client updatedClient);
         bool UpdateRent(Rent? rent, out Rent updatedRent);
 
-        // Entity Framework
+        // Entity Framework for Client
         bool InsertClientEF(Client client, out Client newClient);
+        bool UpdateClientEF(Client? client, out Client updatedClient);
+        bool DeleteClientEF(int ID);
         Client? GetClientEF(int ID);
         IEnumerable<Client> GetAllClientsEF();
-        IEnumerable<Client> GetAllClientsEF(string phrase); // For search
+        IEnumerable<Client> GetAllClientsEF(string phrase); // Search
+
+        // Entity Framework for Bicycle
+        bool InsertBicycleEF(Bicycle? bicycle, out Bicycle newBicycle);
+        bool UpdateBicycleEF(Bicycle? bicycle, out Bicycle updatedBicycle);
+        bool DeleteBicycleEF(int ID);
+        Bicycle? GetBicycleEF(int ID);
+        IEnumerable<Bicycle> GetAllBicyclesEF();
+        IEnumerable<Bicycle> GetAllBicyclesEF(string phrase); // Search
     }
 }

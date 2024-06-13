@@ -6,7 +6,8 @@ namespace Uzduotis01
     public class Rent
     {
         public int ID { get; set; }
-        public int VehicleID { get; set; }
+        public int? VehicleID { get; set; } = null;
+        public int? BicycleID { get; set; } = null;
         public int ClientID { get; set; }
         public DateTime DateFrom { get; set; }
         public DateTime? DateTo { get; set; }
@@ -16,7 +17,7 @@ namespace Uzduotis01
         public Rent()
         {
         }
-        // For writing new (without DateTo)
+        // For writing new vehicle rent (without DateTo)
         public Rent(int vehicleID, int clientID, DateTime dateFrom)
         {
             ID = 0;
@@ -25,7 +26,7 @@ namespace Uzduotis01
             DateFrom = dateFrom;
             DateTo = null;
         }
-        // For writing new
+        // For writing new vehicle rent
         public Rent(int vehicleID, int clientID, DateTime dateFrom, DateTime? dateTo)
         {
             ID = 0;
@@ -34,7 +35,7 @@ namespace Uzduotis01
             DateFrom = dateFrom;
             DateTo = dateTo;
         }
-        // For updating: from RentConsoleUI to RentService (without DateTo)
+        // For updating vehicle rent: from RentConsoleUI to RentService (without DateTo)
         public Rent(int id, int vehicleID, int clientID, DateTime dateFrom)
         {
             ID = id;
@@ -43,7 +44,7 @@ namespace Uzduotis01
             DateFrom = dateFrom;
             DateTo = null;
         }
-        // For updating: from RentConsoleUI to RentService
+        // For updating vehicle rent: from RentConsoleUI to RentService
         public Rent(int id, int vehicleID, int clientID, DateTime dateFrom, DateTime? dateTo)
         {
             ID = id;
@@ -52,11 +53,46 @@ namespace Uzduotis01
             DateFrom = dateFrom;
             DateTo = dateTo;
         }
+        // For writing new bicycle rent (without DateTo)
+        public Rent(int clientID, DateTime dateFrom, int bicycleID)
+        {
+            ID = 0;
+            ClientID = clientID;
+            DateFrom = dateFrom;
+            BicycleID = bicycleID;
+            DateTo = null;
+        }
+        // For writing new bicycle rent
+        public Rent(int clientID, DateTime dateFrom, DateTime? dateTo, int bicycleID)
+        {
+            ID = 0;
+            ClientID = clientID;
+            DateFrom = dateFrom;
+            DateTo = dateTo;
+            BicycleID = bicycleID;
+        }
+        // For updating bicycle rent: from RentConsoleUI to RentService (without DateTo)
+        public Rent(int id, int clientID, DateTime dateFrom, int bicycleID)
+        {
+            ID = id;
+            ClientID = clientID;
+            DateFrom = dateFrom;
+            BicycleID = bicycleID;
+            DateTo = null;
+        }
+        // For updating bicycle rent: from RentConsoleUI to RentService
+        public Rent(int id, int clientID, DateTime dateFrom, DateTime? dateTo, int bicycleID)
+        {
+            ID = id;
+            ClientID = clientID;
+            DateFrom = dateFrom;
+            DateTo = dateTo;
+            BicycleID = bicycleID;
+        }
         // Temporary for updating only DateTo (to DatabaseRepository)
         public Rent(DateTime? dateTo)
         {
             ID = 0;
-            VehicleID = 0;
             ClientID = 0;
             DateFrom = DateTime.Now;
             DateTo = dateTo;
@@ -70,16 +106,26 @@ namespace Uzduotis01
             else if (DateTo != null)
                 dateTo = ((DateTime)DateTo).ToString(("yyy-MM-dd"));
 
-            return $"ID {ID:000} Vehicle ID: {VehicleID}, Client ID: {ClientID}, Date From: {DateOnly.FromDateTime(DateFrom.Date)}, Date To: {dateTo}";
+            string transportID = "";
+            if (VehicleID == null)
+                transportID = $"Bicycle ID: {BicycleID}";
+            else if (BicycleID == null)
+                transportID = $"Vehicle ID: {VehicleID}";
+
+            return $"ID {ID:000} {transportID}, Client ID: {ClientID}, Date From: {DateOnly.FromDateTime(DateFrom.Date)}, Date To: {dateTo}";
         }
 
         public int GetID()
         {
             return ID;
         }
-        public int GetVehicleID()
+        public int? GetVehicleID()
         {
             return VehicleID;
+        }
+        public int? GetBicycleID()
+        {
+            return BicycleID;
         }
         public int GetClientID()
         {
