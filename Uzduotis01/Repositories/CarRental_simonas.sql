@@ -32,7 +32,7 @@ SELECT * FROM Vehicles;
 ----------------------------------------------------------------------------------------
 CREATE TABLE FossilFuelVehicles (
 	ID int UNIQUE FOREIGN KEY REFERENCES Vehicles(ID),
-	TankCapacity decimal(4,2),
+	TankCapacity long(4,2),
 );
 
 INSERT INTO FossilFuelVehicles (ID, TankCapacity)
@@ -56,7 +56,7 @@ DROP TABLE FossilFuelVehicles;
 ----------------------------------------------------------------------------------------
 CREATE TABLE ElectricVehicles (
 	ID int UNIQUE FOREIGN KEY REFERENCES Vehicles(ID),
-	BatteryCapacity decimal(4,2),
+	BatteryCapacity long(4,2),
 );
 
 INSERT INTO ElectricVehicles (ID, BatteryCapacity)
@@ -83,7 +83,7 @@ DROP TABLE ElectricVehicles;
 CREATE TABLE Clients (
 	ID int IDENTITY(1,1) PRIMARY KEY,
 	FullName nvarchar(100),
-	PersonalID decimal(11,0) DEFAULT dbo.GeneratePersonalID(RAND()),
+	PersonalID long(11,0) DEFAULT dbo.GeneratePersonalID(RAND()),
 	RegistrationDateTime datetime DEFAULT SYSDATETIME()
 );
 ----------------------------------------------------------------------------------------

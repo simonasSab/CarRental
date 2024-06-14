@@ -282,7 +282,7 @@ namespace Uzduotis01
         {
             newClient = client;
             string fullName = client.GetFullName();
-            decimal personalID = client.GetPersonalID();
+            long personalID = client.GetPersonalID();
 
             if (personalID != 0)
             {
@@ -623,11 +623,13 @@ namespace Uzduotis01
 
             _dbContext.Add(client);
             _dbContext.SaveChanges();
-            if (client.PersonalID > 0)
+            if (client.ID > 0)
             {
                 newClient = client;
                 return true;
             }
+            _dbContext.Remove(client);
+            _dbContext.SaveChanges();
             return false;
         }
         public bool UpdateClientEF(Client? client, out Client updatedClient)

@@ -18,10 +18,10 @@ namespace Uzduotis01
         public int ID { get; set; }
         [Column("FullName")]
         public string FullName { get; set; }
-        [Column("PersonalID")]
-        public decimal PersonalID { get; set; }
-        [Column("RegistrationDateTime")]
-        public DateTime RegistrationDateTime { get; set; }
+        [Column("PersonalID")] [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public long PersonalID { get; set; } = default;
+        [Column("RegistrationDateTime")] [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime RegistrationDateTime { get; set; } = DateTime.Now;
         [NotMapped] [BsonId]
         ObjectId mongoID { get; set; }
 
@@ -33,17 +33,14 @@ namespace Uzduotis01
         {
             ID = 0;
             FullName = fullName;
-            PersonalID = 0;
-            RegistrationDateTime = DateTime.MinValue;
         }
-        public Client(int id, string fullName, decimal personalID)
+        public Client(int id, string fullName, long personalID)
         {
             ID = id;
             FullName = fullName;
             PersonalID = personalID;
-            RegistrationDateTime = DateTime.MinValue;
         }
-        public Client(int id, string fullName, decimal personalID, DateTime registrationDateTime)
+        public Client(int id, string fullName, long personalID, DateTime registrationDateTime)
         {
             ID = id;
             FullName = fullName;
@@ -63,7 +60,7 @@ namespace Uzduotis01
         {
             FullName = fullName;
         }
-        public decimal GetPersonalID()
+        public long GetPersonalID()
         {
             return PersonalID;
         }

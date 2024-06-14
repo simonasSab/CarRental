@@ -42,7 +42,7 @@ namespace Uzduotis01.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Bicycles");
+                    b.ToTable("Bicycles", (string)null);
                 });
 
             modelBuilder.Entity("Uzduotis01.Client", b =>
@@ -59,17 +59,17 @@ namespace Uzduotis01.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("FullName");
 
-                    b.Property<decimal>("PersonalID")
-                        .HasColumnType("decimal(18,2)")
+                    b.Property<long>("PersonalID")
+                        .HasColumnType("bigint")
                         .HasColumnName("PersonalID");
 
                     b.Property<DateTime>("RegistrationDateTime")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("RegistrationDateTime");
 
                     b.HasKey("ID");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 #pragma warning restore 612, 618
         }

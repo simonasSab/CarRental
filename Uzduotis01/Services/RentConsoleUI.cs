@@ -183,7 +183,7 @@ namespace Uzduotis01
                     Console.Clear();
                     break;
                 case 49:case 97: // Rent vehicle
-                    await RentService.RegisterRent(NewRent());
+                    await RentService.RegisterRent(NewRent(true));
                     Console.Clear();
                     break;
                 case 50:case 98: // Edit vehicle
@@ -213,7 +213,7 @@ namespace Uzduotis01
                 { ConsoleKey.NumPad0, ConsoleKey.NumPad1, ConsoleKey.NumPad2, ConsoleKey.NumPad3,
                   ConsoleKey.D0, ConsoleKey.D1, ConsoleKey.D2, ConsoleKey.D3 };
 
-            Console.WriteLine("~~~ VEHICLES OPTIONS ~~~" +
+            Console.WriteLine("~~~ BICYCLES OPTIONS ~~~" +
                   "\n\n1. Rent bicycle" +
                     "\n2. Edit bicycle" +
                     "\n3. Delete bicycle" +
@@ -236,7 +236,7 @@ namespace Uzduotis01
                     break;
                 case 49:
                 case 97: // Rent bicycle
-                    await RentService.RegisterRent(NewRent());
+                    await RentService.RegisterRent(NewRent(false));
                     Console.Clear();
                     break;
                 case 50:
@@ -485,28 +485,47 @@ namespace Uzduotis01
 
             Console.Clear();
             Console.WriteLine($"Enter an 11-digit personal ID number (Cancel: -1)\n");
-            decimal personalID = SelectPersonalID();
+            long personalID = SelectPersonalID();
             if (personalID == -1)
                 return null;
 
             return new Client(id, fullName, personalID);
         }
 
-        public Rent? NewRent()
+        public Rent? NewRent(bool trueVehicleFalseBicycle)
         {
-            int vehicleID = SelectVehicleID();
-            if (vehicleID == -1)
-                return null;
-            int clientID = SelectClientID();
-            if (clientID == -1)
-                return null;
-            DateTime dateFrom = SelectDate();
+            if (trueVehicleFalseBicycle)
+            {
+                int vehicleID = SelectVehicleID();
+                if (vehicleID == -1)
+                    return null;
+                int clientID = SelectClientID();
+                if (clientID == -1)
+                    return null;
+                DateTime dateFrom = SelectDate();
 
-            Console.WriteLine("\nWould you like to set an end-date to the rent (yes/no)?\n");
-            if (YesOrNo())
-                return new(vehicleID, clientID, dateFrom, SelectDate());
+                Console.WriteLine("\nWould you like to set an end-date to the rent (yes/no)?\n");
+                if (YesOrNo())
+                    return new(vehicleID, clientID, dateFrom, SelectDate());
+                else
+                    return new(vehicleID, clientID, dateFrom);
+            }
             else
-                return new(vehicleID, clientID, dateFrom);
+            {
+                int bicycleID = SelectBicycleID();
+                if (bicycleID == -1)
+                    return null;
+                int clientID = SelectClientID();
+                if (clientID == -1)
+                    return null;
+                DateTime dateFrom = SelectDate();
+
+                Console.WriteLine("\nWould you like to set an end-date to the rent (yes/no)?\n");
+                if (YesOrNo())
+                    return new(bicycleID, clientID, dateFrom, SelectDate());
+                else
+                    return new(bicycleID, clientID, dateFrom);
+            } 
         }
 
         public Rent? NewRent(int id)
@@ -682,16 +701,16 @@ namespace Uzduotis01
             return integer;
         }
 
-        public decimal SelectPersonalID()
+        public long SelectPersonalID()
         {
-            decimal minValueIncl = 10000000000;
-            decimal maxValueExcl = 99999999999;
-            decimal number;
+            long minValueIncl = 10000000000;
+            long maxValueExcl = 99999999999;
+            long number;
             bool isLong;
             do
             {
                 Console.WriteLine("(Cancel: -1)\n");
-                isLong = decimal.TryParse(Console.ReadLine(), out number);
+                isLong = long.TryParse(Console.ReadLine(), out number);
                 if (number == -1)
                 {
                     Console.WriteLine("\nCancelled\n");

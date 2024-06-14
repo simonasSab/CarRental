@@ -134,6 +134,7 @@ namespace Uzduotis01
 
                 return true;
             }
+            Log.Error($"Something went wrong while inserting into DB.\n");
             return false;
         }
         public async Task<bool> RegisterBicycle(Bicycle bicycle) // Entity Framework
