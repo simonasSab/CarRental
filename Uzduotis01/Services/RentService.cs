@@ -761,8 +761,13 @@ namespace Uzduotis01
 
         public bool VehiclesIDExists(int id)
         {
-            DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
-            List<Vehicle> vehicles = [.. fossilFuelVehicles, .. electricVehicles];
+            List<Vehicle> vehicles = new();
+            bool gotAnyVehicles = DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
+
+            if (gotAnyVehicles)
+                vehicles = [.. fossilFuelVehicles, .. electricVehicles];
+            else
+                return false;
 
             if (vehicles.Count > 0)
             {
@@ -781,10 +786,13 @@ namespace Uzduotis01
         }
         public bool VehiclesIDExists(int id, out bool isElectric)
         {
-            DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles);
-            List<Vehicle> vehicles = [.. fossilFuelVehicles, .. electricVehicles];
-
             isElectric = false;
+
+            List<Vehicle> vehicles = new();
+            if (DatabaseRepo.GetAllVehicles(out IEnumerable<FossilFuelVehicle> fossilFuelVehicles, out IEnumerable<ElectricVehicle> electricVehicles))
+                vehicles = [.. fossilFuelVehicles, .. electricVehicles];
+            else
+                return false;
 
             if (vehicles.Count > 0)
             {

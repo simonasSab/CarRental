@@ -478,6 +478,7 @@ namespace Uzduotis01
             if (vehicle is ElectricVehicle)
             {
                 ElectricVehicle electricVehicle = (ElectricVehicle)vehicle;
+                int id = electricVehicle.GetID();
 
                 using (IDbConnection db1 = new SqlConnection(_connectionString))
                 {
@@ -485,7 +486,6 @@ namespace Uzduotis01
                     string model = electricVehicle.GetModel();
                     int productionYear = electricVehicle.GetProductionYear();
                     string vin = electricVehicle.GetVIN();
-                    int id = electricVehicle.GetID();
                     const string sql1 = @"UPDATE Vehicles 
                         SET Make = @make, Model = @model, ProductionYear = @productionYear, VIN = @vin
                         WHERE ID = @id";
@@ -495,10 +495,8 @@ namespace Uzduotis01
                         return false;
                     }
                 }
-
                 using (IDbConnection db2 = new SqlConnection(_connectionString))
                 {
-                    int id = electricVehicle.GetID();
                     double batteryCapacity = electricVehicle.GetBatteryCapacity();
                     const string sql2 = @"UPDATE ElectricVehicles 
                         SET BatteryCapacity = @batteryCapacity WHERE ID = @id";
@@ -508,16 +506,19 @@ namespace Uzduotis01
                         Log.Error("ERROR: Electric vehicle was not updated\n");
                         return false;
                     }
-
+                }
+                using (IDbConnection db3 = new SqlConnection(_connectionString))
+                {
                     const string sql3 = @"SELECT * FROM Vehicles v
-                        INNER JOIN ElectricVehicles e ON v.ID = e.ID WHERE ID = @id;";
-                    updatedVehicle = db2.QueryFirst<ElectricVehicle>(sql3, new { id });
+                        INNER JOIN ElectricVehicles e ON v.ID = e.ID WHERE v.ID = @id;";
+                    updatedVehicle = db3.QueryFirst<ElectricVehicle>(sql3, new { id });
                     return true;
                 }
             }
             else if (vehicle is FossilFuelVehicle)
             {
                 FossilFuelVehicle fossilFuelVehicle = (FossilFuelVehicle)vehicle;
+                int id = fossilFuelVehicle.GetID();
 
                 using (IDbConnection db1 = new SqlConnection(_connectionString))
                 {
@@ -525,7 +526,6 @@ namespace Uzduotis01
                     string model = fossilFuelVehicle.GetModel();
                     int productionYear = fossilFuelVehicle.GetProductionYear();
                     string vin = fossilFuelVehicle.GetVIN();
-                    int id = fossilFuelVehicle.GetID();
                     const string sql1 = @"UPDATE Vehicles 
                         SET Make = @make, Model = @model, ProductionYear = @productionYear, VIN = @vin
                         WHERE ID = @id";
@@ -535,10 +535,8 @@ namespace Uzduotis01
                         return false;
                     }
                 }
-
                 using (IDbConnection db2 = new SqlConnection(_connectionString))
                 {
-                    int id = fossilFuelVehicle.GetID();
                     double tankCapacity = fossilFuelVehicle.GetTankCapacity();
 
                     const string sql2 = @"
@@ -550,11 +548,13 @@ namespace Uzduotis01
                         Log.Error("ERROR: Vehicle was not updated\n");
                         return false;
                     }
-
+                }
+                using (IDbConnection db3 = new SqlConnection(_connectionString))
+                {
                     const string sql3 = @"SELECT * FROM Vehicles v" +
-                        "INNER JOIN ElectricVehicles e ON v.ID = e.ID WHERE ID = @id;";
-                    updatedVehicle = db2.QueryFirst<ElectricVehicle>(sql3, new { id });
-                    return true;
+                        "INNER JOIN FossilFuelVehicles f ON v.ID = f.ID WHERE v.ID = @id;";
+                    updatedVehicle = db3.QueryFirst<FossilFuelVehicle>(sql3, new { id });
+                return true;
                 }
             }
             Log.Error("ERROR: Vehicle was neither Electric nor Fossil Fuel.\n");
@@ -634,17 +634,18 @@ namespace Uzduotis01
         }
         public bool UpdateClientEF(Client? client, out Client updatedClient)
         {
+            // Keep updated object as updatedClient
             updatedClient = client;
             if (client == null)
                 return false;
-
-            _dbContext.Add(client);
+            // Find current object from DB and keep as client
+            client = _dbContext.Clients.Find(client.ID);
+            // Update value in DB
+            _dbContext.Update(updatedClient);
             _dbContext.SaveChanges();
-            if (client.PersonalID > 0)
-            {
-                updatedClient = client;
+            // Check if updatedClient (returned from DB) was updated
+            if (!updatedClient.Equals(client))
                 return true;
-            }
             return false;
         }
         public bool DeleteClientEF(int ID)
@@ -667,7 +668,7 @@ namespace Uzduotis01
             _dbContext.Clients.Remove(client);
             _dbContext.SaveChanges();
 
-            if (_dbContext.Clients.Any(x => x.ID == ID))
+            if (!_dbContext.Clients.Any(x => x.ID == ID))
                 return true;
             else
                 Log.Error("ERROR: ID was not deleted from Clients\n");
@@ -704,19 +705,20 @@ namespace Uzduotis01
             }
             return false;
         }
-        public bool UpdateBicycleEF(Bicycle? bicycle, out Bicycle updatedBicycle)
+        public bool UpdateBicycleEF(Bicycle bicycle, out Bicycle updatedBicycle)
         {
+            // Keep updated object as updatedBicycle
             updatedBicycle = bicycle;
             if (bicycle == null)
                 return false;
-
-            _dbContext.Add(bicycle);
+            // Find current object from DB and keep as bicycle
+            bicycle = _dbContext.Bicycles.Find(bicycle.ID);
+            // Update value in DB
+            _dbContext.Update(updatedBicycle);
             _dbContext.SaveChanges();
-            if (bicycle.ID > 0)
-            {
-                updatedBicycle = bicycle;
+            // Check if updatedBicycle (returned from DB) was updated
+            if (!updatedBicycle.Equals(bicycle))
                 return true;
-            }
             return false;
         }
         public bool DeleteBicycleEF(int ID)
@@ -739,7 +741,7 @@ namespace Uzduotis01
             _dbContext.Bicycles.Remove(bicycle);
             _dbContext.SaveChanges();
 
-            if (_dbContext.Bicycles.Any(x => x.ID == ID))
+            if (!_dbContext.Bicycles.Any(x => x.ID == ID))
                 return true;
             else
                 Log.Error("ERROR: ID was not deleted from Clients\n");

@@ -16,6 +16,6 @@ namespace Uzduotis01
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;TrustServerCertificate=true;");
-        }                                         
+        }
     }
 }

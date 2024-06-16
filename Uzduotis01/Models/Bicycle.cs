@@ -21,11 +21,9 @@ namespace Uzduotis01
     [Table("Bicycles")]
     public class Bicycle
     {
-        [Key] [Column("ID")]
+        [Key]
         public int ID { get; set; }
-        [Column("Name")]
         public string Name { get; set; }
-        [Column("ProductionYear")]
         public int ProductionYear { get; set; }
         [NotMapped] [BsonId]
         ObjectId mongoID { get; set; }
@@ -61,10 +59,14 @@ namespace Uzduotis01
                 return false;
 
             Bicycle bicycle = (Bicycle)obj;
-            if (bicycle.ID == this.ID)
-                return true;
+            if (bicycle.ID != this.ID)
+                return false;
+            if (bicycle.Name != this.Name)
+                return false;
+            if (bicycle.ProductionYear != this.ProductionYear)
+                return false;
 
-            return false;
+            return true;
         }
 
         public override string ToString()

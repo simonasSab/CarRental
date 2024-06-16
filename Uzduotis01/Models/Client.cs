@@ -14,13 +14,12 @@ namespace Uzduotis01
     [Table("Clients")]
     public class Client
     {
-        [Key] [Column("ID")]
+        [Key]
         public int ID { get; set; }
-        [Column("FullName")]
         public string FullName { get; set; }
-        [Column("PersonalID")] [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public long PersonalID { get; set; } = default;
-        [Column("RegistrationDateTime")] [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime RegistrationDateTime { get; set; } = DateTime.Now;
         [NotMapped] [BsonId]
         ObjectId mongoID { get; set; }
@@ -80,10 +79,14 @@ namespace Uzduotis01
                 return false;
 
             Client client = (Client)obj;
-            if (client.ID == this.ID)
-                return true;
+            if (client.ID != this.ID)
+                return false;
+            if (client.FullName != this.FullName)
+                return false;
+            if (client.PersonalID != this.PersonalID)
+                return false;
 
-            return false;
+            return true;
         }
     }
 }

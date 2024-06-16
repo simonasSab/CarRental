@@ -336,7 +336,7 @@ namespace Uzduotis01
                     int id = SelectRentID();
                     Console.Clear();
                     if (id != -1)
-                        RentService.UpdateRent(NewRent(id));
+                        RentService.UpdateRent(UpdateRent(id));
                     break;
                 case 50:case 98: // Delete rent
                     int id2 = SelectRentID();
@@ -528,7 +528,7 @@ namespace Uzduotis01
             } 
         }
 
-        public Rent? NewRent(int id)
+        public Rent? UpdateRent(int id)
         {
             int vehicleID = SelectVehicleID();
             if (vehicleID == -1)

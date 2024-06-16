@@ -1,13 +1,8 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver.Core.Configuration;
-using System.Data.SqlClient;
-using System.Data;
-using MongoDB.Driver;
-using System.Collections.Generic;
-using Amazon.Auth.AccessControlPolicy;
-using Newtonsoft.Json.Linq;
+﻿using System.Data;
 using System.Text.RegularExpressions;
 using Serilog;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace Uzduotis01
 {
@@ -32,7 +27,6 @@ namespace Uzduotis01
             _rents = MongoDatabase.GetCollection<Rent>("Rents");
 
             CacheCleanCTSource = new();
-            // use this? --------------> CacheCleanCTSource.CancelAfter(TimeSpan.FromSeconds(1));
             CToken = CacheCleanCTSource.Token;
         }
 
@@ -44,7 +38,6 @@ namespace Uzduotis01
             CacheCleanCTSource.Dispose();
             // Create new token Source and new Token
             CacheCleanCTSource = new();
-            // use this? --------------> CacheCleanCTSource.CancelAfter(TimeSpan.FromSeconds(1));
             CToken = CacheCleanCTSource.Token;
         }
         public async Task TruncateDatabaseStart(int cachePeriod)
@@ -169,7 +162,7 @@ namespace Uzduotis01
         }
         public async Task<IEnumerable<Rent>> GetAllRentsAsync(int vehicleID)
         {
-            return await _rents.Find(_ => true).ToListAsync();
+            return await _rents.Find(x => x.VehicleID == vehicleID).ToListAsync();
         }
 
         // Import single item into cache
