@@ -1,5 +1,4 @@
 using CarRental_FrontEnd;
-using Uzduotis01;
 
 var builder = WebApplication.CreateBuilder(args);
 

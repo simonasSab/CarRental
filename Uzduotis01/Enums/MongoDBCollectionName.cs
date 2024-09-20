@@ -1,9 +1,8 @@
-﻿namespace Uzduotis01
+﻿namespace Uzduotis01;
+
+public enum MongoDBCollectionName
 {
-    public enum MongoDBCollectionName
-    {
-        Vehicles,
-        Clients,
-        Rents
-    }
+    Vehicles,
+    Clients,
+    Rents
 }

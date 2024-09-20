@@ -6,7 +6,7 @@
     DateTime dateToNotNull;
     List<int> csVehicleIDs = new();
     List<int> csClientIDs = new();
-    int temp = 0;
+    int? temp = 0;
 }
 
 <div align="center">
@@ -51,13 +51,15 @@
                     <td>@rent.GetID()</td>
                     <td>@{
                             temp = rent.GetVehicleID();
-                            csVehicleIDs.Add(temp);
+                            if (temp != null)
+                                csVehicleIDs.Add((int)temp);
                         }
                         <p>@temp</p>
                     </td>
                     <td>@{
                             temp = rent.GetClientID();
-                            csClientIDs.Add(temp);
+                            if (temp != null)
+                                csClientIDs.Add((int)temp);
                         }
                         <p>@temp</p>
                     </td>

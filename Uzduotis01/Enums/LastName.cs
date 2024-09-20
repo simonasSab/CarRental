@@ -1,26 +1,25 @@
-﻿namespace Uzduotis01
+﻿namespace Uzduotis01;
+
+public enum LastName
 {
-    public enum LastName
-    {
-        Gibson,
-        Ellis,
-        Tran,
-        Medina,
-        Aguilar,
-        Stevens,
-        Murray,
-        Ford,
-        Castro,
-        Marshall,
-        Owens,
-        Harrison,
-        Fernandez,
-        McDonald,
-        Woods,
-        Washington,
-        Kennedy,
-        Wells,
-        Vargas,
-        Henry
-    }
+    Gibson,
+    Ellis,
+    Tran,
+    Medina,
+    Aguilar,
+    Stevens,
+    Murray,
+    Ford,
+    Castro,
+    Marshall,
+    Owens,
+    Harrison,
+    Fernandez,
+    McDonald,
+    Woods,
+    Washington,
+    Kennedy,
+    Wells,
+    Vargas,
+    Henry
 }
