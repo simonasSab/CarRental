@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Add SQL Server database
-builder.Services.AddSingleton<IDatabaseRepository, DatabaseRepository>(_ => new DatabaseRepository("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;"));
+builder.Services.AddSingleton<IDatabaseRepository, DatabaseRepository>(_ => new DatabaseRepository("..."));
 // Add MongoDB cache
 builder.Services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(builder.Configuration.GetConnectionString("MongoDb")));
 builder.Services.AddSingleton<IMongoDBRepository, MongoDBRepository>();
