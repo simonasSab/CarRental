@@ -12,7 +12,7 @@ namespace Uzduotis01
 
     public class Program
     {
-        const string connectionUri = "mongodb+srv://simonasSab2:TqrPNQWAo0TRh7NL-@carrental.uoohtxo.mongodb.net/?retryWrites=true&w=majority&appName=CarRental";
+        const string connectionUri = "...";
         static IDatabaseRepository databaseRepository { get; set; }
         static IMongoDBRepository mongoDBRepository { get; set; }
         static IRentService rentService { get; set; }
@@ -34,7 +34,7 @@ namespace Uzduotis01
                 Console.WriteLine(ex);
             }
 
-            databaseRepository = new DatabaseRepository("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;");
+            databaseRepository = new DatabaseRepository("...");
             rentService = new RentService(databaseRepository, mongoDBRepository);
             rentConsoleUI = new RentConsoleUI(rentService);
 
