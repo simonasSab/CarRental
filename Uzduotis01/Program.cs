@@ -11,13 +11,13 @@ namespace Uzduotis01;
 // LABAI SVARBU
 // Laikini sąrašai, meniu ir kita, neturi būti Main dalyje - Main dalyje galimas tik servisų ir repositories inicializavimas!
 
-public class Program
-{
-    const string connectionUri = "mongodb+srv://simonasSab2:TqrPNQWAo0TRh7NL-@carrental.uoohtxo.mongodb.net/?retryWrites=true&w=majority&appName=CarRental";
-    static IDatabaseRepository _databaseRepository { get; set; }
-    static IMongoDBRepository _mongoDBRepository { get; set; }
-    static IRentService _rentService { get; set; }
-    static RentConsoleUI _rentConsoleUI { get; set; }
+    public class Program
+    {
+        const string connectionUri = "mongodb+srv://simonasSab2:TqrPNQWAo0TRh7NL-@carrental.uoohtxo.mongodb.net/?retryWrites=true&w=majority&appName=CarRental";
+        static IDatabaseRepository _databaseRepository { get; set; }
+        static IMongoDBRepository _mongoDBRepository { get; set; }
+        static IRentService _rentService { get; set; }
+        static RentConsoleUI _rentConsoleUI { get; set; }
 
     public static void Main(string[] args)
     {
@@ -43,10 +43,10 @@ public class Program
             Log.Error(ex.Message);
         }
 
-        // Initialize server DB and other services
-        _databaseRepository = new DatabaseRepository("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;");
-        _rentService = new RentService(_databaseRepository, _mongoDBRepository);
-        _rentConsoleUI = new RentConsoleUI(_rentService);
+            // Initialize server DB and other services
+            _databaseRepository = new DatabaseRepository("Server=DESKTOP-OD4Q280;Database=CarRental;Integrated Security=True;");
+            _rentService = new RentService(_databaseRepository, _mongoDBRepository);
+            _rentConsoleUI = new RentConsoleUI(_rentService);
 
         bool isDone = RunAsyncTasks().Result;
     }
